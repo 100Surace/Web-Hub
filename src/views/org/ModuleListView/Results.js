@@ -3,6 +3,7 @@ import clsx from 'clsx';
 import PropTypes from 'prop-types';
 import PerfectScrollbar from 'react-perfect-scrollbar';
 import ButtonGroup from '@material-ui/core/ButtonGroup';
+import Input from '@material-ui/core/Input';
 import {
   Box,
   Card,
@@ -18,14 +19,40 @@ import {
   TextField,
   InputAdornment,
   SvgIcon,
-  makeStyles
+  makeStyles,
+  TableSortLabel,
+  lighten,
+  Toolbar,
+  Tooltip,
+  IconButton
 } from '@material-ui/core';
+import DeleteIcon from '@material-ui/icons/Delete';
+import FilterListIcon from '@material-ui/icons/FilterList';
 import { Search as SearchIcon } from 'react-feather';
+import EditIcon from '@material-ui/icons/Edit';
+import SaveIcon from '@material-ui/icons/Save';
+import CloseIcon from '@material-ui/icons/Close';
+import { setIn } from 'formik';
 
 const useStyles = makeStyles((theme) => ({
-  root: {},
-  avatar: {
-    marginRight: theme.spacing(2)
+  root: {
+    width: '100%',
+    marginTop: theme.spacing(3),
+    overflowX: 'auto'
+  },
+  table: {
+    minWidth: 650
+  },
+  selectTableCell: {
+    width: 60
+  },
+  tableCell: {
+    width: 130,
+    height: 40
+  },
+  input: {
+    width: 130,
+    height: 40
   }
 }));
 
@@ -34,10 +61,13 @@ const Results = ({
   modules,
   selectItem,
   currentId,
-  onEdit,
   onDelete,
   selectedItems,
   selectAllItems,
+  onRequestSort,
+  order,
+  orderBy,
+  update,
   ...rest
 }) => {
   const classes = useStyles();
@@ -66,8 +96,25 @@ const Results = ({
   const handlePageChange = (event, newPage) => {
     setPage(newPage);
   };
+
+  const headCells = [
+    {
+      id: 1,
+      label: 'Module',
+      disablePadding: null
+    }
+  ];
+
+  const createSortHandler = (property) => (event) => {
+    onRequestSort(event, property);
+  };
+
   return (
     <Card className={clsx(classes.root, className)} {...rest}>
+      <TableToolbar
+        numSelected={selectedItems.length}
+        deleteSelected={onDelete}
+      />
       <Box maxWidth={500}>
         <TextField
           fullWidth
@@ -90,13 +137,6 @@ const Results = ({
         >
           <Button>Import</Button>
           <Button>Export</Button>
-          <Button
-            onClick={onEdit}
-            disabled={selectedItems.length > 1 ? true : ''}
-          >
-            Edit
-          </Button>
-          <Button onClick={onDelete}>Delete</Button>
         </ButtonGroup>
       </Box>
       <PerfectScrollbar>
@@ -109,38 +149,42 @@ const Results = ({
                     checked={selectedItems.length === modules.length}
                     color="primary"
                     indeterminate={
-                      selectedItems.length > 0
-                      && selectedItems.length < modules.length
+                      selectedItems.length > 0 &&
+                      selectedItems.length < modules.length
                     }
                     onChange={handleSelectAll}
                   />
                 </TableCell>
-                <TableCell>Name</TableCell>
-                <TableCell>Registration date</TableCell>
+                <TableCell padding="checkbox"></TableCell>
+                {headCells.map((headCell) => (
+                  <TableCell
+                    key={headCell.id}
+                    align={headCell.numeric ? 'right' : 'left'}
+                    padding={headCell.disablePadding ? 'none' : 'default'}
+                    sortDirection={orderBy === headCell.id ? order : false}
+                  >
+                    <TableSortLabel
+                      active={orderBy === headCell.id}
+                      direction={orderBy === headCell.id ? order : 'asc'}
+                      onClick={createSortHandler(headCell.id)}
+                    >
+                      {headCell.label}
+                      {orderBy === headCell.id ? (
+                        <span className={classes.visuallyHidden}></span>
+                      ) : null}
+                    </TableSortLabel>
+                  </TableCell>
+                ))}
               </TableRow>
             </TableHead>
             <TableBody>
               {modules.slice(0, limit).map((module) => (
-                <TableRow
-                  hover
-                  key={module.ids}
-                  selected={selectedItems.indexOf(module.ids) !== -1}
-                >
-                  <TableCell padding="checkbox">
-                    <Checkbox
-                      checked={
-                        selectedItems.indexOf(module.ids) !== -1 ? true : ''
-                      }
-                      onChange={() => handleSelectOne(module.ids)}
-                      value="true"
-                    />
-                  </TableCell>
-                  <TableCell>
-                    <Typography color="textPrimary" variant="body1">
-                      {module.moduleName}
-                    </Typography>
-                  </TableCell>
-                </TableRow>
+                <DataRow
+                  module={module}
+                  selectedItems={selectedItems}
+                  handleSelectOne={handleSelectOne}
+                  update={update}
+                />
               ))}
             </TableBody>
           </Table>
@@ -164,10 +208,157 @@ Results.propTypes = {
   modules: PropTypes.array.isRequired,
   selectItem: PropTypes.func,
   currentId: PropTypes.array,
-  onEdit: PropTypes.func,
   onDelete: PropTypes.func,
   selectedItems: PropTypes.array,
   selectAllItems: PropTypes.func
+};
+
+const useToolbarStyles = makeStyles((theme) => ({
+  root: {
+    paddingLeft: theme.spacing(2),
+    paddingRight: theme.spacing(1)
+  },
+  highlight:
+    theme.palette.type === 'light'
+      ? {
+          color: theme.palette.secondary.main,
+          backgroundColor: lighten(theme.palette.secondary.light, 0.85)
+        }
+      : {
+          color: theme.palette.text.primary,
+          backgroundColor: theme.palette.secondary.dark
+        },
+  title: {
+    flex: '1 1 100%'
+  }
+}));
+
+const TableToolbar = ({ numSelected, deleteSelected }) => {
+  const classes = useToolbarStyles();
+
+  return (
+    <Toolbar
+      className={clsx(classes.root, {
+        [classes.highlight]: numSelected > 0
+      })}
+    >
+      {numSelected > 0 ? (
+        <Typography
+          className={classes.title}
+          color="inherit"
+          variant="subtitle1"
+          component="div"
+        >
+          {numSelected} selected
+        </Typography>
+      ) : (
+        <Typography
+          className={classes.title}
+          variant="h6"
+          id="tableTitle"
+          component="div"
+        >
+          Nutrition
+        </Typography>
+      )}
+
+      {numSelected > 0 ? (
+        <Tooltip title="Delete">
+          <IconButton aria-label="delete">
+            <DeleteIcon onClick={deleteSelected} />
+          </IconButton>
+        </Tooltip>
+      ) : (
+        <Tooltip title="Filter list">
+          <IconButton aria-label="filter list">
+            <FilterListIcon />
+          </IconButton>
+        </Tooltip>
+      )}
+    </Toolbar>
+  );
+};
+
+TableToolbar.propTypes = {
+  numSelected: PropTypes.number.isRequired
+};
+
+const DataRow = ({ update, module, selectedItems, handleSelectOne }) => {
+  const [input, setInput] = useState(module.moduleName);
+  const [editing, setEditing] = useState(false);
+
+  const onEdit = () => {
+    setInput(module.moduleName);
+    setEditing(!editing);
+  };
+  const onChange = (e) => {
+    setInput(e.target.value);
+  };
+  const saveEditing = (id) => {
+    update(id, { moduleName: input });
+    setEditing(!editing);
+  };
+  return (
+    <TableRow
+      hover
+      key={module.ids}
+      selected={selectedItems.indexOf(module.ids) !== -1}
+    >
+      <TableCell padding="checkbox">
+        <Checkbox
+          checked={selectedItems.indexOf(module.ids) !== -1 ? true : ''}
+          onChange={() => handleSelectOne(module.ids)}
+          value="true"
+        />
+      </TableCell>
+      <TableCell padding="checkbox">
+        {editing ? (
+          <ButtonGroup>
+            <Button size="small">
+              <CloseIcon onClick={onEdit} />
+            </Button>
+            <Button size="small">
+              <SaveIcon onClick={() => saveEditing(module.ids)} />
+            </Button>
+          </ButtonGroup>
+        ) : (
+          <Button size="small">
+            <EditIcon onClick={onEdit} />
+          </Button>
+        )}
+      </TableCell>
+      <TableCell>
+        <CustomTableCell
+          isEditMode={editing}
+          value={input}
+          onChange={onChange}
+        />
+      </TableCell>
+    </TableRow>
+  );
+};
+DataRow.propTypes = {
+  module: PropTypes.object
+};
+
+const CustomTableCell = ({ isEditMode, value, onChange }) => {
+  const classes = useStyles();
+  return (
+    <>
+      {isEditMode ? (
+        <section align="left" className={classes.tableCell}>
+          <Input
+            value={value}
+            name="moduleName"
+            onChange={(e) => onChange(e)}
+            className={classes.input}
+          />
+        </section>
+      ) : (
+        <Typography>{value}</Typography>
+      )}
+    </>
+  );
 };
 
 export default Results;

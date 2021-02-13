@@ -1,4 +1,3 @@
-// This is for side nav bar index chanchal
 import React, { useEffect } from 'react';
 import { Link as RouterLink, useLocation } from 'react-router-dom';
 import PropTypes from 'prop-types';
@@ -14,12 +13,12 @@ import {
   makeStyles
 } from '@material-ui/core';
 import {
-  // AlertCircle as AlertCircleIcon,
+  AlertCircle as AlertCircleIcon,
   BarChart as BarChartIcon,
   Lock as LockIcon,
-  // Settings as SettingsIcon,
-  // ShoppingBag as ShoppingBagIcon,
-  // User as UserIcon,
+  Settings as SettingsIcon,
+  ShoppingBag as ShoppingBagIcon,
+  User as UserIcon,
   UserPlus as UserPlusIcon,
   Users as UsersIcon
 } from 'react-feather';
@@ -37,31 +36,31 @@ const items = [
     icon: BarChartIcon,
     title: 'Dashboard'
   },
-  // {
-  //   href: '/app/customers',
-  //   icon: UsersIcon,
-  //   title: 'Customers'
-  // },
   {
     href: '/app/modules',
     icon: UsersIcon,
     title: 'Modules'
   },
-  // {
-  //   href: '/app/products',
-  //   icon: ShoppingBagIcon,
-  //   title: 'Products'
-  // },
-  // {
-  //   href: '/app/account',
-  //   icon: UserIcon,
-  //   title: 'Account'
-  // },
-  // {
-  //   href: '/app/settings',
-  //   icon: SettingsIcon,
-  //   title: 'Settings'
-  // },
+  {
+    href: '/app/customers',
+    icon: UsersIcon,
+    title: 'Customers'
+  },
+  {
+    href: '/app/products',
+    icon: ShoppingBagIcon,
+    title: 'Products'
+  },
+  {
+    href: '/app/account',
+    icon: UserIcon,
+    title: 'Account'
+  },
+  {
+    href: '/app/settings',
+    icon: SettingsIcon,
+    title: 'Settings'
+  },
   {
     href: '/login',
     icon: LockIcon,
@@ -72,11 +71,11 @@ const items = [
     icon: UserPlusIcon,
     title: 'Register'
   },
-  // {
-  //   href: '/404',
-  //   icon: AlertCircleIcon,
-  //   title: 'Error'
-  // }
+  {
+    href: '/404',
+    icon: AlertCircleIcon,
+    title: 'Error'
+  }
 ];
 
 const useStyles = makeStyles(() => ({
@@ -162,13 +161,13 @@ const NavBar = ({ onMobileClose, openMobile }) => {
           gutterBottom
           variant="h4"
         >
-          SewaHub Development
+          Need more?
         </Typography>
         <Typography
           align="center"
           variant="body2"
         >
-          @copyright sewahub 2020
+          Upgrade to PRO version and access 20 more screens
         </Typography>
         <Box
           display="flex"
@@ -178,10 +177,10 @@ const NavBar = ({ onMobileClose, openMobile }) => {
           <Button
             color="primary"
             component="a"
-            href="https://sewahub.com"
+            href="https://react-material-kit.devias.io"
             variant="contained"
           >
-            SewaHub
+            See PRO version
           </Button>
         </Box>
       </Box>

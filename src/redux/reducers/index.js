@@ -2,6 +2,6 @@ import { combineReducers } from 'redux';
 import modules from './modules';
 
 const reducers = combineReducers({
-  modules
+  modules,
 });
 export default reducers;

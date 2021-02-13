@@ -40,7 +40,7 @@ export const create = (data, onSuccess) => (dispatch) => {
     .catch((err) => console.log(err));
 };
 
-export const update = (id, data, onSuccess) => (dispatch) => {
+export const update = (id, data) => (dispatch) => {
   data = formatData(data);
   data.ids = id;
   api
@@ -51,7 +51,6 @@ export const update = (id, data, onSuccess) => (dispatch) => {
         type: ACTION_TYPES.UPDATE,
         payload: { id, ...data }
       });
-      onSuccess();
     })
     .catch((err) => console.log(err));
 };

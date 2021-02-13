@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Box, Container, makeStyles } from '@material-ui/core';
-import PropTypes from 'prop-types';
 import Page from 'src/components/Page';
+import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { useToasts } from 'react-toast-notifications';
 import * as actions from 'src/redux/actions/organization/module';
@@ -21,11 +21,14 @@ const ModuleListView = ({
   fetch,
   modules,
   deleteModules,
+  update,
   onInputChange
 }) => {
   const classes = useStyles();
 
   const [selectedItems, setSelectedItem] = useState([]);
+  const [order, setOrder] = useState('asc');
+  const [orderBy, setOrderBy] = useState('id');
 
   const selectItem = (id) => {
     const newIds = selectedItems.slice();
@@ -60,12 +63,23 @@ const ModuleListView = ({
     for (let i = 0; i < selectedItems.length; i++) {
       deleteModules(selectedItems[i], onSuccess);
     }
+
+    setSelectedItem([]);
+  };
+
+  const handleRequestSort = (event, property) => {
+    const isAsc = orderBy === property && order === 'asc';
+    setOrder(isAsc ? 'desc' : 'asc');
+    setOrderBy(property);
   };
 
   return (
     <Page className={classes.root} title="Modules">
       <Container maxWidth={false}>
-        <Toolbar currentId={selectedItems[0]} setSelectedItem={setSelectedItem} />
+        <Toolbar
+          currentId={selectedItems[0]}
+          setSelectedItem={setSelectedItem}
+        />
         <Box mt={3}>
           <Results
             selectItem={selectItem}
@@ -74,6 +88,10 @@ const ModuleListView = ({
             onEdit={onEdit}
             onDelete={onDelete}
             selectAllItems={selectAllItems}
+            onRequestSort={handleRequestSort}
+            order={order}
+            orderBy={orderBy}
+            update={update}
           />
         </Box>
       </Container>
@@ -95,6 +113,7 @@ const mapStateToProps = (state) => ({
 const mapActionToProps = {
   fetch: actions.fetchAll,
   deleteModules: actions.Delete,
+  update: actions.update,
   onInputChange: actions.onInputChange
 };
 
