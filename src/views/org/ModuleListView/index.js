@@ -22,7 +22,8 @@ const ModuleListView = ({
   modules,
   deleteModules,
   update,
-  onInputChange
+  onInputChange,
+  onSearch
 }) => {
   const classes = useStyles();
 
@@ -114,6 +115,7 @@ const mapActionToProps = {
   fetch: actions.fetchAll,
   deleteModules: actions.Delete,
   update: actions.update,
+  onSearch: actions.onSearch,
   onInputChange: actions.onInputChange
 };
 

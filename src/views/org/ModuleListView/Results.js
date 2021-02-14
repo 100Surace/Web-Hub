@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import clsx from 'clsx';
 import PropTypes from 'prop-types';
 import PerfectScrollbar from 'react-perfect-scrollbar';
@@ -73,6 +73,8 @@ const Results = ({
   const classes = useStyles();
   const [limit, setLimit] = useState(10);
   const [page, setPage] = useState(0);
+  const [searchText, setSearchText] = useState('');
+  const [searchResult, setSearchResult] = useState(modules);
 
   const handleSelectAll = (event) => {
     let newSelectedModuleIds;
@@ -109,6 +111,19 @@ const Results = ({
     onRequestSort(event, property);
   };
 
+  const search = (e) => {
+    const value = e.target.value;
+    setSearchText(value);
+    const result = modules.filter((module) =>
+      module.moduleName.toLowerCase().includes(value.toLowerCase())
+    );
+    setSearchResult(result);
+  };
+
+  useEffect(() => {
+    if (searchText == '') setSearchResult(modules);
+  });
+
   return (
     <Card className={clsx(classes.root, className)} {...rest}>
       <TableToolbar
@@ -129,6 +144,8 @@ const Results = ({
           }}
           placeholder="Search module"
           variant="outlined"
+          value={searchText}
+          onChange={search}
         />
         <ButtonGroup
           variant="contained"
@@ -178,14 +195,25 @@ const Results = ({
               </TableRow>
             </TableHead>
             <TableBody>
-              {modules.slice(0, limit).map((module) => (
-                <DataRow
-                  module={module}
-                  selectedItems={selectedItems}
-                  handleSelectOne={handleSelectOne}
-                  update={update}
-                />
-              ))}
+              {searchResult.length !== 0 ? (
+                searchResult
+                  .slice(0, limit)
+                  .map((module) => (
+                    <DataRow
+                      key={module.ids}
+                      module={module}
+                      selectedItems={selectedItems}
+                      handleSelectOne={handleSelectOne}
+                      update={update}
+                    />
+                  ))
+              ) : (
+                <TableRow
+                  style={{ width: '100%', textAlign: 'center', color: '#777' }}
+                >
+                  No Matching Result
+                </TableRow>
+              )}
             </TableBody>
           </Table>
         </Box>
@@ -258,7 +286,7 @@ const TableToolbar = ({ numSelected, deleteSelected }) => {
           id="tableTitle"
           component="div"
         >
-          Nutrition
+          Modules
         </Typography>
       )}
 

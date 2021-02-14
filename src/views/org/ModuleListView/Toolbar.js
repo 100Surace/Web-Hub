@@ -15,7 +15,7 @@ import { connect } from 'react-redux';
 import * as actions from 'src/redux/actions/organization/module';
 
 const useStyles = makeStyles(() => ({
-  root: {},
+  root: {}
 }));
 
 const Toolbar = ({
@@ -47,11 +47,14 @@ const Toolbar = ({
       onInputChange('');
     }
   };
+
+  const handleEnter = (e) => {
+    if (e.key === 'Enter') {
+      handleSubmit(e);
+    }
+  };
   return (
-    <div
-      className={clsx(classes.root, className)}
-      {...rest}
-    >
+    <div className={clsx(classes.root, className)} {...rest}>
       <Box mt={3}>
         <Card>
           <CardContent>
@@ -60,6 +63,7 @@ const Toolbar = ({
                 fullWidth
                 value={form.moduleName}
                 onChange={onChange}
+                onKeyDown={handleEnter}
                 required
                 InputProps={{
                   startAdornment: (
