@@ -5,7 +5,8 @@ export const ACTION_TYPES = {
   UPDATE: 'UPDATE',
   DELETE: 'DELETE',
   FETCH_ALL: 'FETCH_ALL',
-  ON_CHANGE: 'ON_CHANGE'
+  ON_CHANGE: 'ON_CHANGE',
+  ON_SEARCH: 'ON_SEARCH'
 };
 
 const formatData = (data) => ({
@@ -72,6 +73,13 @@ export const Delete = (id, onSuccess) => (dispatch) => {
 export const onInputChange = (data) => (dispatch) => {
   dispatch({
     type: ACTION_TYPES.ON_CHANGE,
+    payload: data
+  });
+};
+
+export const onSearch = (data) => (dispatch) => {
+  dispatch({
+    type: ACTION_TYPES.ON_SEARCH,
     payload: data
   });
 };
