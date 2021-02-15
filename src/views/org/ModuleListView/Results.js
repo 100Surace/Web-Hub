@@ -32,7 +32,6 @@ import { Search as SearchIcon } from 'react-feather';
 import EditIcon from '@material-ui/icons/Edit';
 import SaveIcon from '@material-ui/icons/Save';
 import CloseIcon from '@material-ui/icons/Close';
-import { setIn } from 'formik';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -56,6 +55,7 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
+// get props passed from parent
 const Results = ({
   className,
   modules,
@@ -68,13 +68,14 @@ const Results = ({
   order,
   orderBy,
   update,
+  setSearchResult,
+  searchText,
+  setSearchText,
   ...rest
 }) => {
   const classes = useStyles();
   const [limit, setLimit] = useState(10);
   const [page, setPage] = useState(0);
-  const [searchText, setSearchText] = useState('');
-  const [searchResult, setSearchResult] = useState(modules);
 
   const handleSelectAll = (event) => {
     let newSelectedModuleIds;
@@ -119,10 +120,6 @@ const Results = ({
     );
     setSearchResult(result);
   };
-
-  useEffect(() => {
-    if (searchText == '') setSearchResult(modules);
-  });
 
   return (
     <Card className={clsx(classes.root, className)} {...rest}>
@@ -195,8 +192,8 @@ const Results = ({
               </TableRow>
             </TableHead>
             <TableBody>
-              {searchResult.length !== 0 ? (
-                searchResult
+              {modules.length !== 0 ? (
+                modules
                   .slice(0, limit)
                   .map((module) => (
                     <DataRow

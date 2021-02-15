@@ -43,12 +43,6 @@ const modules = (state = initialState, action) => {
         form: { moduleName: action.payload }
       };
 
-    case ACTION_TYPES.ON_SEARCH:
-      return {
-        ...state,
-        list: []
-      };
-
     default:
       return state;
   }

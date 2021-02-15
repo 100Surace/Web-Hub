@@ -22,14 +22,16 @@ const ModuleListView = ({
   modules,
   deleteModules,
   update,
-  onInputChange,
-  onSearch
+  onInputChange
 }) => {
   const classes = useStyles();
 
   const [selectedItems, setSelectedItem] = useState([]);
   const [order, setOrder] = useState('asc');
-  const [orderBy, setOrderBy] = useState('id');
+  // state to hold searhced items
+  const [searchResult, setSearchResult] = useState(modules);
+  // state to hold searching text
+  const [searchText, setSearchText] = useState('');
 
   const selectItem = (id) => {
     const newIds = selectedItems.slice();
@@ -49,6 +51,7 @@ const ModuleListView = ({
 
   useEffect(() => {
     fetch();
+    if (searchText == '') setSearchResult(modules);
   });
 
   const onEdit = () => {
@@ -71,7 +74,6 @@ const ModuleListView = ({
   const handleRequestSort = (event, property) => {
     const isAsc = orderBy === property && order === 'asc';
     setOrder(isAsc ? 'desc' : 'asc');
-    setOrderBy(property);
   };
 
   return (
@@ -82,10 +84,11 @@ const ModuleListView = ({
           setSelectedItem={setSelectedItem}
         />
         <Box mt={3}>
+          {/* passing props to Result child component */}
           <Results
             selectItem={selectItem}
             selectedItems={selectedItems}
-            modules={modules}
+            modules={searchResult}
             onEdit={onEdit}
             onDelete={onDelete}
             selectAllItems={selectAllItems}
@@ -93,6 +96,9 @@ const ModuleListView = ({
             order={order}
             orderBy={orderBy}
             update={update}
+            setSearchResult={setSearchResult}
+            searchText={searchText}
+            setSearchText={setSearchText}
           />
         </Box>
       </Container>
@@ -115,7 +121,6 @@ const mapActionToProps = {
   fetch: actions.fetchAll,
   deleteModules: actions.Delete,
   update: actions.update,
-  onSearch: actions.onSearch,
   onInputChange: actions.onInputChange
 };
 

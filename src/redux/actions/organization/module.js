@@ -76,10 +76,3 @@ export const onInputChange = (data) => (dispatch) => {
     payload: data
   });
 };
-
-export const onSearch = (data) => (dispatch) => {
-  dispatch({
-    type: ACTION_TYPES.ON_SEARCH,
-    payload: data
-  });
-};
