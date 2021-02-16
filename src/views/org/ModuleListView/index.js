@@ -27,6 +27,7 @@ const ModuleListView = ({
   const classes = useStyles();
 
   const [selectedItems, setSelectedItem] = useState([]);
+  const [sorting, setSorting] = useState(false);
   const [order, setOrder] = useState('asc');
   // state to hold searhced items
   const [searchResult, setSearchResult] = useState(modules);
@@ -51,7 +52,7 @@ const ModuleListView = ({
 
   useEffect(() => {
     fetch();
-    if (searchText == '') setSearchResult(modules);
+    if (searchText == '' && !sorting) setSearchResult(modules);
   });
 
   const onEdit = () => {
@@ -71,9 +72,20 @@ const ModuleListView = ({
     setSelectedItem([]);
   };
 
-  const handleRequestSort = (event, property) => {
-    const isAsc = orderBy === property && order === 'asc';
-    setOrder(isAsc ? 'desc' : 'asc');
+  const handleRequestSort = () => {
+    let result = [];
+    setOrder(order === 'asc' ? 'desc' : 'asc');
+    if (order === 'desc') {
+      result = searchResult.sort((a, b) =>
+        a.moduleName > b.moduleName ? 1 : b.moduleName > a.moduleName ? -1 : 0
+      );
+    } else {
+      result = searchResult.sort((a, b) =>
+        a.moduleName < b.moduleName ? 1 : b.moduleName < a.moduleName ? -1 : 0
+      );
+    }
+    setSorting(true);
+    setSearchResult(result);
   };
 
   return (
@@ -94,7 +106,6 @@ const ModuleListView = ({
             selectAllItems={selectAllItems}
             onRequestSort={handleRequestSort}
             order={order}
-            orderBy={orderBy}
             update={update}
             setSearchResult={setSearchResult}
             searchText={searchText}

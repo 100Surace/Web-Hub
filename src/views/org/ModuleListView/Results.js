@@ -108,10 +108,6 @@ const Results = ({
     }
   ];
 
-  const createSortHandler = (property) => (event) => {
-    onRequestSort(event, property);
-  };
-
   const search = (e) => {
     const value = e.target.value;
     setSearchText(value);
@@ -175,18 +171,10 @@ const Results = ({
                     key={headCell.id}
                     align={headCell.numeric ? 'right' : 'left'}
                     padding={headCell.disablePadding ? 'none' : 'default'}
-                    sortDirection={orderBy === headCell.id ? order : false}
+                    style={{ cursor: 'pointer' }}
+                    onClick={onRequestSort}
                   >
-                    <TableSortLabel
-                      active={orderBy === headCell.id}
-                      direction={orderBy === headCell.id ? order : 'asc'}
-                      onClick={createSortHandler(headCell.id)}
-                    >
-                      {headCell.label}
-                      {orderBy === headCell.id ? (
-                        <span className={classes.visuallyHidden}></span>
-                      ) : null}
-                    </TableSortLabel>
+                    <TableSortLabel>{headCell.label}</TableSortLabel>
                   </TableCell>
                 ))}
               </TableRow>
@@ -246,12 +234,12 @@ const useToolbarStyles = makeStyles((theme) => ({
   highlight:
     theme.palette.type === 'light'
       ? {
-          color: theme.palette.secondary.main,
-          backgroundColor: lighten(theme.palette.secondary.light, 0.85)
+          color: 'red',
+          backgroundColor: 'rgba(255,0,0,0.1)'
         }
       : {
-          color: theme.palette.text.primary,
-          backgroundColor: theme.palette.secondary.dark
+          color: 'red',
+          backgroundColor: 'rgba(255,0,0,0.1)'
         },
   title: {
     flex: '1 1 100%'
@@ -273,6 +261,7 @@ const TableToolbar = ({ numSelected, deleteSelected }) => {
           color="inherit"
           variant="subtitle1"
           component="div"
+          style={{ color: 'red' }}
         >
           {numSelected} selected
         </Typography>
@@ -328,6 +317,11 @@ const DataRow = ({ update, module, selectedItems, handleSelectOne }) => {
       hover
       key={module.ids}
       selected={selectedItems.indexOf(module.ids) !== -1}
+      style={
+        selectedItems.indexOf(module.ids) !== -1
+          ? { background: 'rgba(255,0,0,0.1)' }
+          : {}
+      }
     >
       <TableCell padding="checkbox">
         <Checkbox
