@@ -5,7 +5,7 @@ const formFields = {
 };
 
 const initialState = {
-  list: [],
+  modulesList: [],
   form: formFields
 };
 
@@ -14,19 +14,19 @@ const modules = (state = initialState, action) => {
     case ACTION_TYPES.FETCH_ALL:
       return {
         ...state,
-        list: [...action.payload]
+        modulesList: [...action.payload]
       };
 
     case ACTION_TYPES.CREATE:
       return {
         ...state,
-        list: [...state.list, action.payload]
+        modulesList: [...state.modulesList, action.payload]
       };
 
     case ACTION_TYPES.UPDATE:
       return {
         ...state,
-        list: state.list.map((x) => {
+        modulesList: state.modulesList.map((x) => {
           return x.ids === action.payload.id ? action.payload : x;
         })
       };
@@ -34,7 +34,7 @@ const modules = (state = initialState, action) => {
     case ACTION_TYPES.DELETE:
       return {
         ...state,
-        list: state.list.filter((x) => x.ids !== action.payload)
+        modulesList: state.modulesList.filter((x) => x.ids !== action.payload)
       };
 
     case ACTION_TYPES.ON_CHANGE:
