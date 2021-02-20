@@ -80,6 +80,7 @@ const Results = ({
   const [isSorting, setIsSorting] = useState(false);
   const [sortOrder, setSortOrder] = useState('asc');
   const [searchInput, setSearchInput] = useState('');
+  const [disableHover, setDisableHover] = useState(false);
 
   const handleSelectAll = (event) => {
     let newSelectedModuleIds;
@@ -90,6 +91,8 @@ const Results = ({
       newSelectedModuleIds = [];
     }
     setSelectedItems(newSelectedModuleIds);
+    if (newSelectedModuleIds.length === 0) setDisableHover(false);
+    else setDisableHover(true);
   };
 
   const handleSelectOne = (id) => {
@@ -100,6 +103,8 @@ const Results = ({
       newIds.push(id);
     }
     setSelectedItems(newIds);
+    if (newIds.length === 0) setDisableHover(false);
+    else setDisableHover(true);
   };
 
   const handleLimitChange = (event) => {
@@ -228,7 +233,6 @@ const Results = ({
                     onChange={handleSelectAll}
                   />
                 </TableCell>
-                <TableCell padding="checkbox"></TableCell>
                 {headCells.map((headCell) => (
                   <TableCell
                     key={headCell.id}
@@ -257,6 +261,8 @@ const Results = ({
                       setSelectedItems={setSelectedItems}
                       setSearchInput={setSearchInput}
                       setIsSorting={setIsSorting}
+                      disableHover={disableHover}
+                      setDisableHover={setDisableHover}
                     />
                   ))
               ) : (
@@ -379,22 +385,29 @@ const DataRow = ({
   deleteModule,
   setSelectedItems,
   setSearchInput,
-  setIsSorting
+  setIsSorting,
+  disableHover,
+  setDisableHover
 }) => {
   const { addToast } = useToasts();
 
   const [input, setInput] = useState(module.moduleName);
   const [editing, setEditing] = useState(false);
   const [isHover, setIsHover] = useState(false);
+  const [editId, setEditId] = useState(0);
 
-  const onEdit = () => {
+  const onEdit = (id) => {
     setInput(module.moduleName);
     setEditing(!editing);
+    setDisableHover(true);
+    setEditId(id);
   };
 
   const onEditCancel = () => {
     setInput(module.moduleName);
     setEditing(!editing);
+    setDisableHover(false);
+    setEditId(0);
   };
 
   const onInputChange = (e) => {
@@ -403,6 +416,8 @@ const DataRow = ({
   const saveEditing = (id) => {
     updateModule(id, { moduleName: input });
     setEditing(!editing);
+    setDisableHover(false);
+    setEditId(0);
   };
 
   const onMouseEnterHandler = (e) => {
@@ -443,22 +458,6 @@ const DataRow = ({
           value="true"
         />
       </TableCell>
-      <TableCell padding="checkbox">
-        {editing ? (
-          <ButtonGroup>
-            <Button size="small" onClick={onEditCancel}>
-              <CloseIcon />
-            </Button>
-            <Button size="small" onClick={() => saveEditing(module.ids)}>
-              <SaveIcon />
-            </Button>
-          </ButtonGroup>
-        ) : (
-          <Button size="small" onClick={onEdit}>
-            <EditIcon />
-          </Button>
-        )}
-      </TableCell>
       <TableCell>
         <CustomTableCell
           isEditMode={editing}
@@ -467,9 +466,18 @@ const DataRow = ({
         />
       </TableCell>
       <TableCell align="right">
-        {isHover ? (
+        {disableHover ? (
+          editId === module.ids ? (
+            <ButtonGroup>
+              <CloseIcon onClick={() => onEditCancel(module.ids)} />
+              <SaveIcon onClick={() => saveEditing(module.ids)} />
+            </ButtonGroup>
+          ) : (
+            ''
+          )
+        ) : isHover ? (
           <ButtonGroup>
-            <GetAppIcon style={{ cursor: 'pointer' }} />
+            <EditIcon onClick={() => onEdit(module.ids)} />
             <DeleteIcon
               style={{ cursor: 'pointer' }}
               onClick={() => deleteThis(module.ids)}
