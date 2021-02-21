@@ -56,18 +56,36 @@ export const update = (id, data) => (dispatch) => {
     .catch((err) => console.log(err));
 };
 
-export const Delete = (id, onSuccess) => (dispatch) => {
-  api
-    .module()
-    .delete(id)
-    .then(() => {
-      dispatch({
-        type: ACTION_TYPES.DELETE,
-        payload: id
-      });
-      onSuccess();
-    })
-    .catch((err) => console.log(err));
+export const Delete = (ids, onSuccess) => (dispatch) => {
+  if (Array.isArray(ids)) {
+    let pass = false;
+    for (let i = 0; i < ids.length; i++) {
+      api
+        .module()
+        .delete(ids[i])
+        .then(() => {
+          pass = true;
+          dispatch({
+            type: ACTION_TYPES.DELETE,
+            payload: ids[i]
+          });
+          if (i === ids.length - 1) onSuccess();
+        })
+        .catch((err) => (pass = false));
+    }
+  } else {
+    api
+      .module()
+      .delete(ids)
+      .then(() => {
+        dispatch({
+          type: ACTION_TYPES.DELETE,
+          payload: ids
+        });
+        onSuccess();
+      })
+      .catch((err) => console.log(err));
+  }
 };
 
 export const onInputChange = (data) => (dispatch) => {

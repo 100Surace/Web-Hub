@@ -86,7 +86,9 @@ const Results = ({
     let newSelectedModuleIds;
 
     if (event.target.checked) {
-      newSelectedModuleIds = searchList.map((module) => module.ids);
+      newSelectedModuleIds = searchList
+        .slice(page * limit, page * limit + limit)
+        .map((module) => module.ids);
     } else {
       newSelectedModuleIds = [];
     }
@@ -160,29 +162,25 @@ const Results = ({
     const onSuccess = () => {
       addToast('Delete successfully', { appearance: 'success' });
     };
-    for (let i = 0; i < selectedItems.length; i++) {
-      deleteModule(selectedItems[i], onSuccess);
-    }
+    deleteModule(selectedItems, onSuccess);
     setSelectedItems([]);
     setSearchInput('');
     setIsSorting(false);
+    setDisableHover(false);
+  };
+
+  const clearSelection = () => {
+    setSelectedItems([]);
   };
 
   useEffect(() => {
-    const result = modulesList.sort((a, b) =>
-      a.moduleName.toLowerCase() > b.moduleName.toLowerCase()
-        ? 1
-        : b.moduleName.toLowerCase() > a.moduleName.toLowerCase()
-        ? -1
-        : 0
-    );
     if (
-      JSON.stringify(result) !== JSON.stringify(oldList) &&
+      JSON.stringify(modulesList) !== JSON.stringify(oldList) &&
       searchInput == '' &&
       !isSorting
     ) {
-      setOldList(result);
-      setSearchList(result);
+      setOldList(modulesList);
+      setSearchList(modulesList);
     }
   });
   return (
@@ -190,6 +188,7 @@ const Results = ({
       <TableToolbar
         numSelected={selectedItems.length}
         deleteSelected={deleteSelected}
+        clearSelection={clearSelection}
       />
       <Box maxWidth={500}>
         <TextField
@@ -283,7 +282,7 @@ const Results = ({
         onChangeRowsPerPage={handleLimitChange}
         page={page}
         rowsPerPage={limit}
-        rowsPerPageOptions={[5, 10, 25]}
+        rowsPerPageOptions={[10, 25, 50, 100]}
       />
     </Card>
   );
@@ -319,7 +318,7 @@ const useToolbarStyles = makeStyles((theme) => ({
   }
 }));
 
-const TableToolbar = ({ numSelected, deleteSelected }) => {
+const TableToolbar = ({ numSelected, deleteSelected, clearSelection }) => {
   const classes = useToolbarStyles();
 
   return (
@@ -351,6 +350,9 @@ const TableToolbar = ({ numSelected, deleteSelected }) => {
 
       {numSelected > 0 ? (
         <>
+          <Tooltip title="Clear Selection">
+            <IconButton onClick={clearSelection}> Clear</IconButton>
+          </Tooltip>
           <Tooltip title="Export">
             <IconButton>
               <GetAppIcon />
