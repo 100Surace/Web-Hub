@@ -75,36 +75,69 @@ const Results = ({
   const [oldList, setOldList] = useState([]);
   // module data state
   const [searchList, setSearchList] = useState([...modulesList]);
-  // console.log(searchList);
   const [selectedItems, setSelectedItems] = useState([]);
   const [isSorting, setIsSorting] = useState(false);
   const [sortOrder, setSortOrder] = useState('asc');
   const [searchInput, setSearchInput] = useState('');
   const [disableHover, setDisableHover] = useState(false);
+  const [isCheckAll, setIsCheckAll] = useState(false);
+  const [selectedPerPage, setSelectedPerPage] = useState([]);
 
   const handleSelectAll = (event) => {
     let newSelectedModuleIds;
-
     if (event.target.checked) {
       newSelectedModuleIds = searchList
         .slice(page * limit, page * limit + limit)
         .map((module) => module.ids);
+
+      setSelectedItems((selectedItems) => [
+        ...selectedItems,
+        ...newSelectedModuleIds
+      ]);
+      setSelectedPerPage(newSelectedModuleIds);
+      checkAll(newSelectedModuleIds);
     } else {
-      newSelectedModuleIds = [];
+      newSelectedModuleIds = searchList
+        .slice(page * limit, page * limit + limit)
+        .map((module) => module.ids);
+      const newItems = selectedItems.filter(
+        (id) => !newSelectedModuleIds.includes(id)
+      );
+      setSelectedItems(newItems);
+      setSelectedPerPage([]);
+      setIsCheckAll(false);
     }
-    setSelectedItems(newSelectedModuleIds);
     if (newSelectedModuleIds.length === 0) setDisableHover(false);
     else setDisableHover(true);
   };
 
+  let currentList = [];
+  const checkAll = (selected) => {
+    currentList = searchList
+      .slice(page * limit, page * limit + limit)
+      .map((module) => module.ids);
+    for (let i = 0; i < currentList.length; i++) {
+      if (selected.includes(currentList[i])) setIsCheckAll(true);
+    }
+  };
+
   const handleSelectOne = (id) => {
     const newIds = selectedItems.slice();
+    const curIds = selectedPerPage.slice();
     if (newIds.indexOf(id) !== -1) {
       newIds.splice(newIds.indexOf(id), 1);
     } else {
       newIds.push(id);
     }
+    if (curIds.indexOf(id) !== -1) {
+      curIds.splice(curIds.indexOf(id), 1);
+      setIsCheckAll(false);
+    } else {
+      curIds.push(id);
+      if (curIds.length === currentList.length) setIsCheckAll(true);
+    }
     setSelectedItems(newIds);
+    setSelectedPerPage(curIds);
     if (newIds.length === 0) setDisableHover(false);
     else setDisableHover(true);
   };
@@ -115,6 +148,7 @@ const Results = ({
 
   const handlePageChange = (event, newPage) => {
     setPage(newPage);
+    checkAll(selectedItems);
   };
 
   const headCells = [
@@ -173,7 +207,14 @@ const Results = ({
     setSelectedItems([]);
   };
 
+  currentList = searchList
+    .slice(page * limit, page * limit + limit)
+    .map((module) => module.ids);
   useEffect(() => {
+    for (let i = 0; i < currentList.length; i++) {
+      if (selectedItems.includes(currentList[i])) setIsCheckAll(true);
+      else setIsCheckAll(false);
+    }
     if (
       JSON.stringify(modulesList) !== JSON.stringify(oldList) &&
       searchInput == '' &&
@@ -223,11 +264,11 @@ const Results = ({
               <TableRow>
                 <TableCell padding="checkbox">
                   <Checkbox
-                    checked={selectedItems.length === searchList.length}
+                    checked={isCheckAll}
                     color="primary"
                     indeterminate={
-                      selectedItems.length > 0 &&
-                      selectedItems.length < searchList.length
+                      selectedPerPage.length > 0 &&
+                      selectedPerPage.length < currentList.length
                     }
                     onChange={handleSelectAll}
                   />
@@ -282,7 +323,7 @@ const Results = ({
         onChangeRowsPerPage={handleLimitChange}
         page={page}
         rowsPerPage={limit}
-        rowsPerPageOptions={[10, 25, 50, 100]}
+        rowsPerPageOptions={[10, 25, 50, 100, { label: 'All', value: -1 }]}
       />
     </Card>
   );

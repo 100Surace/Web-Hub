@@ -58,20 +58,18 @@ export const update = (id, data) => (dispatch) => {
 
 export const Delete = (ids, onSuccess) => (dispatch) => {
   if (Array.isArray(ids)) {
-    let pass = false;
     for (let i = 0; i < ids.length; i++) {
       api
         .module()
         .delete(ids[i])
         .then(() => {
-          pass = true;
           dispatch({
             type: ACTION_TYPES.DELETE,
             payload: ids[i]
           });
           if (i === ids.length - 1) onSuccess();
         })
-        .catch((err) => (pass = false));
+        .catch((err) => console.log(err));
     }
   } else {
     api
