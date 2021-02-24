@@ -107,8 +107,6 @@ const Results = ({
       setSelectedPerPage([]);
       setIsCheckAll(false);
     }
-    if (newSelectedModuleIds.length === 0) setDisableHover(false);
-    else setDisableHover(true);
   };
 
   let currentList = [];
@@ -138,8 +136,6 @@ const Results = ({
     }
     setSelectedItems(newIds);
     setSelectedPerPage(curIds);
-    if (newIds.length === 0) setDisableHover(false);
-    else setDisableHover(true);
   };
 
   const handleLimitChange = (event) => {
@@ -200,7 +196,6 @@ const Results = ({
     setSelectedItems([]);
     setSearchInput('');
     setIsSorting(false);
-    setDisableHover(false);
   };
 
   const clearSelection = () => {
@@ -519,13 +514,17 @@ const DataRow = ({
             ''
           )
         ) : isHover ? (
-          <ButtonGroup>
-            <EditIcon onClick={() => onEdit(module.ids)} />
-            <DeleteIcon
-              style={{ cursor: 'pointer' }}
-              onClick={() => deleteThis(module.ids)}
-            />
-          </ButtonGroup>
+          selectedItems.indexOf(module.ids) === -1 ? (
+            <ButtonGroup>
+              <EditIcon onClick={() => onEdit(module.ids)} />
+              <DeleteIcon
+                style={{ cursor: 'pointer' }}
+                onClick={() => deleteThis(module.ids)}
+              />
+            </ButtonGroup>
+          ) : (
+            ''
+          )
         ) : (
           ''
         )}

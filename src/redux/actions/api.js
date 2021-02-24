@@ -12,7 +12,7 @@ const API = {
       delete: (id) => axios.delete(url + id)
     };
   },
-  moduleCategories(url = `${baseUrl}moduleCategories/`) {
+  moduleCategory(url = `${baseUrl}moduleCategories/`) {
     return {
       fetchAll: () => axios.get(url),
       fetchById: (id) => axios.get(url + id),

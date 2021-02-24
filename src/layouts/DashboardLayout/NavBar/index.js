@@ -42,6 +42,11 @@ const items = [
     title: 'Modules'
   },
   {
+    href: '/app/moduleCategories',
+    icon: BarChartIcon,
+    title: 'Module Category'
+  },
+  {
     href: '/app/customers',
     icon: UsersIcon,
     title: 'Customers'
