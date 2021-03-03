@@ -58,35 +58,38 @@ const DataRow = ({
   setIsSorting,
   disableHover,
   setDisableHover,
-  CustomTableCell
+  CustomTableCell,
+  modulesList
 }) => {
-  const data = validateData(rowData);
   const { addToast } = useToasts();
 
-  const [input, setInput] = useState(data.moduleName);
   const [editing, setEditing] = useState(false);
   const [isHover, setIsHover] = useState(false);
   const [editId, setEditId] = useState(0);
+  const [formValue, setFormValue] = useState();
+  const [originalValue, setOriginalFormVal] = useState();
 
   const onEdit = (id) => {
-    setInput(data.moduleName);
+    console.log(formValue);
+    setFormValue(originalValue);
     setEditing(!editing);
     setDisableHover(true);
     setEditId(id);
   };
 
   const onEditCancel = () => {
-    setInput(data.moduleName);
+    setFormValue(originalValue);
     setEditing(!editing);
     setDisableHover(false);
     setEditId(0);
   };
 
   const onInputChange = (e) => {
-    setInput(e.target.value);
+    const value = e.target.value;
+    setFormValue({ ...formValue, [e.target.name]: value });
   };
   const saveEditing = (id) => {
-    updateData(id, { moduleName: input });
+    updateData(id, formValue);
     setEditing(!editing);
     setDisableHover(false);
     setEditId(0);
@@ -115,43 +118,47 @@ const DataRow = ({
       onMouseEnter={onMouseEnterHandler}
       onMouseLeave={onMouseLeaveHandler}
       hover
-      key={data.ids}
-      selected={selectedItems.indexOf(data.ids) !== -1}
+      key={rowData.ids}
+      selected={selectedItems.indexOf(rowData.ids) !== -1}
       style={
-        selectedItems.indexOf(data.ids) !== -1
+        selectedItems.indexOf(rowData.ids) !== -1
           ? { background: 'rgba(255,0,0,0.1)' }
           : {}
       }
     >
       <TableCell padding="checkbox">
         <Checkbox
-          checked={selectedItems.indexOf(data.ids) !== -1 ? true : false}
-          onChange={() => handleSelectOne(data.ids)}
+          checked={selectedItems.indexOf(rowData.ids) !== -1 ? true : false}
+          onChange={() => handleSelectOne(rowData.ids)}
           value="true"
         />
       </TableCell>
       <CustomTableCell
-        dataRow={data}
+        formValue={formValue}
+        setFormValue={setFormValue}
+        setOriginalFormVal={setOriginalFormVal}
+        rowData={rowData}
         isEditMode={editing}
         onInputChange={onInputChange}
+        modulesList={modulesList}
       />
       <TableCell align="right">
         {disableHover ? (
-          editId === data.ids ? (
+          editId === rowData.ids ? (
             <ButtonGroup>
-              <CloseIcon onClick={() => onEditCancel(data.ids)} />
-              <SaveIcon onClick={() => saveEditing(data.ids)} />
+              <CloseIcon onClick={() => onEditCancel(rowData.ids)} />
+              <SaveIcon onClick={() => saveEditing(rowData.ids)} />
             </ButtonGroup>
           ) : (
             ''
           )
         ) : isHover ? (
-          selectedItems.indexOf(data.ids) === -1 ? (
+          selectedItems.indexOf(rowData.ids) === -1 ? (
             <ButtonGroup>
-              <EditIcon onClick={() => onEdit(data.ids)} />
+              <EditIcon onClick={() => onEdit(rowData.ids)} />
               <DeleteIcon
                 style={{ cursor: 'pointer' }}
-                onClick={() => deleteThis(data.ids)}
+                onClick={() => deleteThis(rowData.ids)}
               />
             </ButtonGroup>
           ) : (

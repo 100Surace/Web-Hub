@@ -80,7 +80,9 @@ const Toolbar = ({ className, modulesList, addModuleCategory, ...rest }) => {
                   name="moduleId"
                 >
                   {modulesList.map(({ ids, moduleName }) => (
-                    <MenuItem value={ids}>{moduleName}</MenuItem>
+                    <MenuItem key={ids} value={ids}>
+                      {moduleName}
+                    </MenuItem>
                   ))}
                 </Select>
               </FormControl>

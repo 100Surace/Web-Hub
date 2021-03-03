@@ -34,7 +34,10 @@ const ModuleCategoryListView = ({
       <Container maxWidth={false}>
         <Toolbar modulesList={modulesList} />
         <Box mt={3}>
-          <Results moduleCategoryList={moduleCategoryList} />
+          <Results
+            moduleCategoryList={moduleCategoryList}
+            modulesList={modulesList}
+          />
         </Box>
       </Container>
     </Page>

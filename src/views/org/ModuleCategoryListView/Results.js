@@ -18,7 +18,9 @@ import {
   InputAdornment,
   SvgIcon,
   makeStyles,
-  Input
+  Input,
+  Select,
+  MenuItem
 } from '@material-ui/core';
 import TableToolbar from '../TableToolbar';
 import { Search as SearchIcon } from 'react-feather';
@@ -40,6 +42,7 @@ const Results = ({
   fetchModuleCategory,
   deleteModuleCategory,
   updateModuleCategory,
+  modulesList,
   ...rest
 }) => {
   const classes = useStyles();
@@ -60,9 +63,14 @@ const Results = ({
   const handleSelectAll = (event) => {
     let newSelectedCategoryIds;
     if (event.target.checked) {
+      // gets ids that are not checked
       newSelectedCategoryIds = searchList
         .slice(page * limit, page * limit + limit)
-        .map((category) => category.ids);
+        .map((category) => {
+          if (!selectedItems.includes(category.ids)) return category.ids;
+        })
+        .filter((id) => id !== undefined);
+
       setSelectedItems((selectedItems) => [
         ...selectedItems,
         ...newSelectedCategoryIds
@@ -224,6 +232,7 @@ const Results = ({
                   disableHover={disableHover}
                   setDisableHover={setDisableHover}
                   CustomTableCell={CustomTableCell}
+                  modulesList={modulesList}
                 />
               ))}
             </TableBody>
@@ -261,8 +270,26 @@ const mapActionToProps = {
 
 export default connect(mapStateToProps, mapActionToProps)(Results);
 
-const CustomTableCell = ({ dataRow, isEditMode, onInputChange }) => {
+const CustomTableCell = ({
+  formValue,
+  setFormValue,
+  setOriginalFormVal,
+  rowData,
+  isEditMode,
+  onInputChange,
+  modulesList
+}) => {
   const classes = useStyles();
+  const data = {
+    moduleCategoryName: rowData.moduleCategoryName,
+    moduleId: rowData.moduleId
+  };
+
+  console.log(rowData);
+  useEffect(() => {
+    setFormValue({ ...data });
+    setOriginalFormVal({ ...data });
+  }, []);
   return (
     <>
       {isEditMode ? (
@@ -270,7 +297,7 @@ const CustomTableCell = ({ dataRow, isEditMode, onInputChange }) => {
           <TableCell>
             <section align="left" className={classes.tableCell}>
               <Input
-                value={dataRow.moduleCategoryName}
+                value={formValue.moduleCategoryName}
                 name="moduleCategoryName"
                 onChange={(e) => onInputChange(e)}
                 className={classes.input}
@@ -279,22 +306,36 @@ const CustomTableCell = ({ dataRow, isEditMode, onInputChange }) => {
           </TableCell>
           <TableCell>
             <section align="left" className={classes.tableCell}>
-              <Input
-                value={dataRow.moduleName}
+              {/* <Input
+                value={formValue.moduleName}
                 name="moduleName"
                 onChange={(e) => onInputChange(e)}
                 className={classes.input}
-              />
+              /> */}
+              <Select
+                labelId="SelectModule"
+                id="SelectModule"
+                value={formValue.moduleId}
+                onChange={(e) => onInputChange(e)}
+                label="Select Module"
+                name="moduleId"
+              >
+                {modulesList.map(({ ids, moduleName }) => (
+                  <MenuItem key={ids} value={ids}>
+                    {moduleName}
+                  </MenuItem>
+                ))}
+              </Select>
             </section>
           </TableCell>
         </>
       ) : (
         <>
           <TableCell>
-            <Typography>{dataRow.moduleCategoryName}</Typography>
+            <Typography>{rowData.moduleCategoryName}</Typography>
           </TableCell>
           <TableCell>
-            <Typography>{dataRow.moduleName}</Typography>
+            <Typography>{rowData.moduleName}</Typography>
           </TableCell>
         </>
       )}
