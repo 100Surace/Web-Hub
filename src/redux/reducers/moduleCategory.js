@@ -1,19 +1,12 @@
 import { ACTION_TYPES } from '../actions/organization/moduleCategory';
 
-const formFields = {
-  moduleId: '',
-  moduleCategoryName: ''
-};
-
 const initialState = {
-  moduleCategoryList: [],
-  form: formFields
+  moduleCategoryList: []
 };
 
 const moduleCategory = (state = initialState, action) => {
   switch (action.type) {
     case ACTION_TYPES.FETCH_ALL:
-      console.log(action.payload);
       return {
         ...state,
         moduleCategoryList: [...action.payload]

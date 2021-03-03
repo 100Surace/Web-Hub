@@ -1,10 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import clsx from 'clsx';
 import PropTypes from 'prop-types';
-import moment from 'moment';
 import PerfectScrollbar from 'react-perfect-scrollbar';
 import {
-  Avatar,
   Box,
   Card,
   Checkbox,
@@ -15,9 +13,19 @@ import {
   TablePagination,
   TableRow,
   Typography,
-  makeStyles
+  Button,
+  TextField,
+  InputAdornment,
+  SvgIcon,
+  makeStyles,
+  Input
 } from '@material-ui/core';
-import getInitials from 'src/utils/getInitials';
+import TableToolbar from '../TableToolbar';
+import { Search as SearchIcon } from 'react-feather';
+import DataRow from '../DataRow';
+import { connect } from 'react-redux';
+import * as actions from 'src/redux/actions/organization/moduleCategory';
+import ButtonGroup from '@material-ui/core/ButtonGroup';
 
 const useStyles = makeStyles((theme) => ({
   root: {},
@@ -26,51 +34,90 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-const Results = ({ className, moduleCategoryList, ...rest }) => {
+const Results = ({
+  className,
+  moduleCategoryList,
+  fetchModuleCategory,
+  deleteModuleCategory,
+  updateModuleCategory,
+  ...rest
+}) => {
   const classes = useStyles();
   const [selectedCustomerIds, setSelectedCustomerIds] = useState([]);
+  const [selectedItems, setSelectedItems] = useState([]);
+  const [isSorting, setIsSorting] = useState(false);
+  const [sortOrder, setSortOrder] = useState('asc');
+  const [searchInput, setSearchInput] = useState('');
   const [limit, setLimit] = useState(10);
   const [page, setPage] = useState(0);
 
+  const [searchList, setSearchList] = useState([...moduleCategoryList]);
+  const [disableHover, setDisableHover] = useState(false);
+  const [isCheckAll, setIsCheckAll] = useState(false);
+  const [selectedPerPage, setSelectedPerPage] = useState([]);
+  const [oldList, setOldList] = useState([]);
+
   const handleSelectAll = (event) => {
-    let newSelectedCustomerIds;
-
+    let newSelectedCategoryIds;
     if (event.target.checked) {
-      newSelectedCustomerIds = moduleCategoryList.map(
-        (moduleCategory) => moduleCategory.id
-      );
+      newSelectedCategoryIds = searchList
+        .slice(page * limit, page * limit + limit)
+        .map((category) => category.ids);
+      setSelectedItems((selectedItems) => [
+        ...selectedItems,
+        ...newSelectedCategoryIds
+      ]);
+      setSelectedPerPage(newSelectedCategoryIds);
+      checkAll(newSelectedCategoryIds);
     } else {
-      newSelectedCustomerIds = [];
+      newSelectedCategoryIds = searchList
+        .slice(page * limit, page * limit + limit)
+        .map((module) => module.ids);
+      const newItems = selectedItems.filter(
+        (id) => !newSelectedCategoryIds.includes(id)
+      );
+      setSelectedItems(newItems);
+      setSelectedPerPage([]);
+      setIsCheckAll(false);
     }
-
-    setSelectedCustomerIds(newSelectedCustomerIds);
   };
 
-  const handleSelectOne = (event, id) => {
-    const selectedIndex = selectedCustomerIds.indexOf(id);
-    let newSelectedCustomerIds = [];
-
-    if (selectedIndex === -1) {
-      newSelectedCustomerIds = newSelectedCustomerIds.concat(
-        selectedCustomerIds,
-        id
-      );
-    } else if (selectedIndex === 0) {
-      newSelectedCustomerIds = newSelectedCustomerIds.concat(
-        selectedCustomerIds.slice(1)
-      );
-    } else if (selectedIndex === selectedCustomerIds.length - 1) {
-      newSelectedCustomerIds = newSelectedCustomerIds.concat(
-        selectedCustomerIds.slice(0, -1)
-      );
-    } else if (selectedIndex > 0) {
-      newSelectedCustomerIds = newSelectedCustomerIds.concat(
-        selectedCustomerIds.slice(0, selectedIndex),
-        selectedCustomerIds.slice(selectedIndex + 1)
-      );
+  let currentList = [];
+  const checkAll = (selected) => {
+    currentList = searchList
+      .slice(page * limit, page * limit + limit)
+      .map((module) => module.ids);
+    for (let i = 0; i < currentList.length; i++) {
+      if (selected.includes(currentList[i])) setIsCheckAll(true);
     }
+  };
 
-    setSelectedCustomerIds(newSelectedCustomerIds);
+  const handleSelectOne = (id) => {
+    const newIds = selectedItems.slice();
+    const curIds = selectedPerPage.slice();
+    if (newIds.indexOf(id) !== -1) {
+      newIds.splice(newIds.indexOf(id), 1);
+    } else {
+      newIds.push(id);
+    }
+    if (curIds.indexOf(id) !== -1) {
+      curIds.splice(curIds.indexOf(id), 1);
+      setIsCheckAll(false);
+    } else {
+      curIds.push(id);
+      if (curIds.length === currentList.length) setIsCheckAll(true);
+    }
+    setSelectedItems(newIds);
+    setSelectedPerPage(curIds);
+  };
+
+  const onSearching = (e) => {
+    const value = e.target.value;
+    setSearchInput(value);
+    const result = moduleCategoryList.filter((category) =>
+      category.moduleName.toLowerCase().includes(value.toLowerCase())
+    );
+    setSearchList(result);
   };
 
   const handleLimitChange = (event) => {
@@ -80,9 +127,68 @@ const Results = ({ className, moduleCategoryList, ...rest }) => {
   const handlePageChange = (event, newPage) => {
     setPage(newPage);
   };
+  const deleteSelected = () => {
+    const onSuccess = () => {
+      addToast('Delete successfully', { appearance: 'success' });
+    };
+    deleteModuleCategory(selectedItems, onSuccess);
+    setSelectedItems([]);
+    setSearchInput('');
+    setIsSorting(false);
+  };
 
+  const clearSelection = () => {
+    setSelectedItems([]);
+  };
+
+  useEffect(() => {
+    for (let i = 0; i < currentList.length; i++) {
+      if (selectedItems.includes(currentList[i])) setIsCheckAll(true);
+      else setIsCheckAll(false);
+    }
+    if (
+      JSON.stringify(moduleCategoryList) !== JSON.stringify(oldList) &&
+      searchInput == '' &&
+      !isSorting
+    ) {
+      setOldList(moduleCategoryList);
+      setSearchList(moduleCategoryList);
+    }
+  });
   return (
     <Card className={clsx(classes.root, className)} {...rest}>
+      <TableToolbar
+        title="Module Categories"
+        numSelected={selectedItems.length}
+        deleteSelected={deleteSelected}
+        clearSelection={clearSelection}
+      />
+      <Box maxWidth={500}>
+        <TextField
+          fullWidth
+          InputProps={{
+            startAdornment: (
+              <InputAdornment position="start">
+                <SvgIcon fontSize="small" color="action">
+                  <SearchIcon />
+                </SvgIcon>
+              </InputAdornment>
+            )
+          }}
+          placeholder="Search module"
+          variant="outlined"
+          value={searchInput}
+          onChange={onSearching}
+        />
+        <ButtonGroup
+          variant="contained"
+          color="primary"
+          aria-label="contained primary button group"
+        >
+          <Button>Import</Button>
+          <Button>Export</Button>
+        </ButtonGroup>
+      </Box>
       <PerfectScrollbar>
         <Box minWidth={1050}>
           <Table>
@@ -90,13 +196,11 @@ const Results = ({ className, moduleCategoryList, ...rest }) => {
               <TableRow>
                 <TableCell padding="checkbox">
                   <Checkbox
-                    checked={
-                      selectedCustomerIds.length === moduleCategoryList.length
-                    }
+                    checked={isCheckAll}
                     color="primary"
                     indeterminate={
-                      selectedCustomerIds.length > 0 &&
-                      selectedCustomerIds.length < moduleCategoryList.length
+                      selectedPerPage.length > 0 &&
+                      selectedPerPage.length < currentList.length
                     }
                     onChange={handleSelectAll}
                   />
@@ -107,27 +211,20 @@ const Results = ({ className, moduleCategoryList, ...rest }) => {
             </TableHead>
             <TableBody>
               {moduleCategoryList.slice(0, limit).map((moduleCategory) => (
-                <TableRow
-                  hover
+                <DataRow
                   key={moduleCategory.ids}
-                  selected={
-                    selectedCustomerIds.indexOf(moduleCategory.ids) !== -1
-                  }
-                >
-                  <TableCell padding="checkbox">
-                    <Checkbox
-                      checked={
-                        selectedCustomerIds.indexOf(moduleCategory.ids) !== -1
-                      }
-                      onChange={(event) =>
-                        handleSelectOne(event, moduleCategory.ids)
-                      }
-                      value="true"
-                    />
-                  </TableCell>
-                  <TableCell>{moduleCategory.moduleCategoryName}</TableCell>
-                  <TableCell>{moduleCategory.moduleName}</TableCell>
-                </TableRow>
+                  rowData={moduleCategory}
+                  selectedItems={selectedItems}
+                  handleSelectOne={handleSelectOne}
+                  updateData={updateModuleCategory}
+                  deleteData={deleteModuleCategory}
+                  setSelectedItems={setSelectedItems}
+                  setSearchInput={setSearchInput}
+                  setIsSorting={setIsSorting}
+                  disableHover={disableHover}
+                  setDisableHover={setDisableHover}
+                  CustomTableCell={CustomTableCell}
+                />
               ))}
             </TableBody>
           </Table>
@@ -151,4 +248,56 @@ Results.propTypes = {
   moduleCategoryList: PropTypes.array.isRequired
 };
 
-export default Results;
+const mapStateToProps = (state) => ({
+  // moduleCategoryList: state.moduleCategory.moduleCategoryList
+});
+
+// mapping redux actions to component props
+const mapActionToProps = {
+  fetchModuleCategory: actions.FetchAll,
+  deleteModuleCategory: actions.Delete,
+  updateModuleCategory: actions.Update
+};
+
+export default connect(mapStateToProps, mapActionToProps)(Results);
+
+const CustomTableCell = ({ dataRow, isEditMode, onInputChange }) => {
+  const classes = useStyles();
+  return (
+    <>
+      {isEditMode ? (
+        <>
+          <TableCell>
+            <section align="left" className={classes.tableCell}>
+              <Input
+                value={dataRow.moduleCategoryName}
+                name="moduleCategoryName"
+                onChange={(e) => onInputChange(e)}
+                className={classes.input}
+              />
+            </section>
+          </TableCell>
+          <TableCell>
+            <section align="left" className={classes.tableCell}>
+              <Input
+                value={dataRow.moduleName}
+                name="moduleName"
+                onChange={(e) => onInputChange(e)}
+                className={classes.input}
+              />
+            </section>
+          </TableCell>
+        </>
+      ) : (
+        <>
+          <TableCell>
+            <Typography>{dataRow.moduleCategoryName}</Typography>
+          </TableCell>
+          <TableCell>
+            <Typography>{dataRow.moduleName}</Typography>
+          </TableCell>
+        </>
+      )}
+    </>
+  );
+};

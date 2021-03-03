@@ -18,9 +18,9 @@ const useStyles = makeStyles((theme) => ({
 // module Category list view component (parent component)
 const ModuleCategoryListView = ({
   fetchModuleCategory,
-  moduleCategoryList,
   fetchModules,
-  modulesList
+  modulesList,
+  moduleCategoryList
 }) => {
   const classes = useStyles();
 

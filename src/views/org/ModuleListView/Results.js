@@ -20,22 +20,17 @@ import {
   InputAdornment,
   SvgIcon,
   makeStyles,
-  TableSortLabel,
-  Toolbar,
-  Tooltip,
-  IconButton
+  TableSortLabel
 } from '@material-ui/core';
 import DeleteIcon from '@material-ui/icons/Delete';
-import FilterListIcon from '@material-ui/icons/FilterList';
+import TableToolbar from '../TableToolbar';
 import { Search as SearchIcon } from 'react-feather';
 import EditIcon from '@material-ui/icons/Edit';
 import SaveIcon from '@material-ui/icons/Save';
 import CloseIcon from '@material-ui/icons/Close';
-import GetAppIcon from '@material-ui/icons/GetApp';
 import { useToasts } from 'react-toast-notifications';
 import { connect } from 'react-redux';
 import * as actions from 'src/redux/actions/organization/module';
-import modules from 'src/redux/reducers/modules';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -222,6 +217,7 @@ const Results = ({
   return (
     <Card className={clsx(classes.root, className)} {...rest}>
       <TableToolbar
+        title="Modules"
         numSelected={selectedItems.length}
         deleteSelected={deleteSelected}
         clearSelection={clearSelection}
@@ -332,88 +328,6 @@ const mapActionToProps = {
 };
 
 export default connect(mapStateToProps, mapActionToProps)(Results);
-
-// child components
-const useToolbarStyles = makeStyles((theme) => ({
-  root: {
-    paddingLeft: theme.spacing(2),
-    paddingRight: theme.spacing(1)
-  },
-  highlight:
-    theme.palette.type === 'light'
-      ? {
-          color: 'red',
-          backgroundColor: 'rgba(255,0,0,0.1)'
-        }
-      : {
-          color: 'red',
-          backgroundColor: 'rgba(255,0,0,0.1)'
-        },
-  title: {
-    flex: '1 1 100%'
-  }
-}));
-
-const TableToolbar = ({ numSelected, deleteSelected, clearSelection }) => {
-  const classes = useToolbarStyles();
-
-  return (
-    <Toolbar
-      className={clsx(classes.root, {
-        [classes.highlight]: numSelected > 0
-      })}
-    >
-      {numSelected > 0 ? (
-        <Typography
-          className={classes.title}
-          color="inherit"
-          variant="subtitle1"
-          component="div"
-          style={{ color: 'red' }}
-        >
-          {numSelected} selected
-        </Typography>
-      ) : (
-        <Typography
-          className={classes.title}
-          variant="h6"
-          id="tableTitle"
-          component="div"
-        >
-          Modules
-        </Typography>
-      )}
-
-      {numSelected > 0 ? (
-        <>
-          <Tooltip title="Clear Selection">
-            <IconButton onClick={clearSelection}> Clear</IconButton>
-          </Tooltip>
-          <Tooltip title="Export">
-            <IconButton>
-              <GetAppIcon />
-            </IconButton>
-          </Tooltip>
-          <Tooltip title="Delete">
-            <IconButton onClick={deleteSelected} aria-label="delete">
-              <DeleteIcon />
-            </IconButton>
-          </Tooltip>
-        </>
-      ) : (
-        <Tooltip title="Filter list">
-          <IconButton aria-label="filter list">
-            <FilterListIcon />
-          </IconButton>
-        </Tooltip>
-      )}
-    </Toolbar>
-  );
-};
-
-TableToolbar.propTypes = {
-  numSelected: PropTypes.number.isRequired
-};
 
 const DataRow = ({
   updateModule,

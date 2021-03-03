@@ -31,10 +31,10 @@ export const Create = (data, onSuccess) => (dispatch) => {
     .moduleCategory()
     .create(data)
     .then((res) => {
-      dispatch({
-        type: ACTION_TYPES.CREATE,
-        payload: res.data
-      });
+      // dispatch({
+      //   type: ACTION_TYPES.CREATE,
+      //   payload: res.data
+      // });
       onSuccess();
     })
     .catch((err) => console.log(err));
