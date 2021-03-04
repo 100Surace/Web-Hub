@@ -26,7 +26,8 @@ const Toolbar = ({ className, modulesList, addModuleCategory, ...rest }) => {
   const classes = useStyles();
   const [formState, setFormState] = useState({
     moduleId: '',
-    moduleCategoryName: ''
+    moduleCategoryName: '',
+    moduleName: ''
   });
   const { addToast } = useToasts();
 
@@ -34,8 +35,16 @@ const Toolbar = ({ className, modulesList, addModuleCategory, ...rest }) => {
     const value = e.target.value;
     const name = e.target.name;
 
-    if (name === 'moduleId') setFormState({ ...formState, moduleId: value });
-    else if (name === 'moduleCategoryName')
+    if (name === 'moduleId') {
+      // gets moduleName of selected id
+      const module = modulesList.filter((module) => module.ids === value)[0];
+
+      setFormState({
+        ...formState,
+        moduleId: value,
+        moduleName: module.moduleName
+      });
+    } else if (name === 'moduleCategoryName')
       setFormState({ ...formState, moduleCategoryName: value });
   };
 

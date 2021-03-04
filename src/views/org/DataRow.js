@@ -4,8 +4,6 @@ import {
   Checkbox,
   TableCell,
   TableRow,
-  Typography,
-  Input,
   makeStyles,
   ButtonGroup
 } from '@material-ui/core';
@@ -61,16 +59,16 @@ const DataRow = ({
   CustomTableCell,
   modulesList
 }) => {
+  const classes = useStyles();
   const { addToast } = useToasts();
 
   const [editing, setEditing] = useState(false);
   const [isHover, setIsHover] = useState(false);
   const [editId, setEditId] = useState(0);
-  const [formValue, setFormValue] = useState();
+  const [formValue, setFormValue] = useState({});
   const [originalValue, setOriginalFormVal] = useState();
 
   const onEdit = (id) => {
-    console.log(formValue);
     setFormValue(originalValue);
     setEditing(!editing);
     setDisableHover(true);
@@ -89,10 +87,16 @@ const DataRow = ({
     setFormValue({ ...formValue, [e.target.name]: value });
   };
   const saveEditing = (id) => {
-    updateData(id, formValue);
+    // gets slected moduleName from id
+    const module = modulesList.filter(
+      (module) => module.ids === formValue.moduleId
+    )[0];
+    updateData(id, { ...formValue, moduleName: module.moduleName });
     setEditing(!editing);
     setDisableHover(false);
     setEditId(0);
+    // set state with updated moduleName
+    setFormValue({ ...formValue, moduleName: module.moduleName });
   };
 
   const onMouseEnterHandler = (e) => {

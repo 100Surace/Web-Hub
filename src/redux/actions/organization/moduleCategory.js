@@ -31,17 +31,16 @@ export const Create = (data, onSuccess) => (dispatch) => {
     .moduleCategory()
     .create(data)
     .then((res) => {
-      // dispatch({
-      //   type: ACTION_TYPES.CREATE,
-      //   payload: res.data
-      // });
+      dispatch({
+        type: ACTION_TYPES.CREATE,
+        payload: data
+      });
       onSuccess();
     })
     .catch((err) => console.log(err));
 };
 
 export const Update = (id, data) => (dispatch) => {
-  data = formatData(data);
   data.ids = id;
   api
     .moduleCategory()
@@ -49,7 +48,7 @@ export const Update = (id, data) => (dispatch) => {
     .then(() => {
       dispatch({
         type: ACTION_TYPES.UPDATE,
-        payload: { id, ...data }
+        payload: { ...data }
       });
     })
     .catch((err) => console.log(err));

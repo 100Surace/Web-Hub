@@ -134,6 +134,7 @@ const Results = ({
 
   const handlePageChange = (event, newPage) => {
     setPage(newPage);
+    checkAll(selectedItems);
   };
   const deleteSelected = () => {
     const onSuccess = () => {
@@ -149,6 +150,9 @@ const Results = ({
     setSelectedItems([]);
   };
 
+  currentList = searchList
+    .slice(page * limit, page * limit + limit)
+    .map((module) => module.ids);
   useEffect(() => {
     for (let i = 0; i < currentList.length; i++) {
       if (selectedItems.includes(currentList[i])) setIsCheckAll(true);
@@ -173,7 +177,6 @@ const Results = ({
       />
       <Box maxWidth={500}>
         <TextField
-          fullWidth
           InputProps={{
             startAdornment: (
               <InputAdornment position="start">
@@ -218,35 +221,37 @@ const Results = ({
               </TableRow>
             </TableHead>
             <TableBody>
-              {moduleCategoryList.slice(0, limit).map((moduleCategory) => (
-                <DataRow
-                  key={moduleCategory.ids}
-                  rowData={moduleCategory}
-                  selectedItems={selectedItems}
-                  handleSelectOne={handleSelectOne}
-                  updateData={updateModuleCategory}
-                  deleteData={deleteModuleCategory}
-                  setSelectedItems={setSelectedItems}
-                  setSearchInput={setSearchInput}
-                  setIsSorting={setIsSorting}
-                  disableHover={disableHover}
-                  setDisableHover={setDisableHover}
-                  CustomTableCell={CustomTableCell}
-                  modulesList={modulesList}
-                />
-              ))}
+              {moduleCategoryList
+                .slice(page * limit, page * limit + limit)
+                .map((moduleCategory) => (
+                  <DataRow
+                    key={moduleCategory.ids}
+                    rowData={moduleCategory}
+                    selectedItems={selectedItems}
+                    handleSelectOne={handleSelectOne}
+                    updateData={updateModuleCategory}
+                    deleteData={deleteModuleCategory}
+                    setSelectedItems={setSelectedItems}
+                    setSearchInput={setSearchInput}
+                    setIsSorting={setIsSorting}
+                    disableHover={disableHover}
+                    setDisableHover={setDisableHover}
+                    CustomTableCell={CustomTableCell}
+                    modulesList={modulesList}
+                  />
+                ))}
             </TableBody>
           </Table>
         </Box>
       </PerfectScrollbar>
       <TablePagination
         component="div"
-        count={moduleCategoryList.length}
+        count={searchList.length}
         onChangePage={handlePageChange}
         onChangeRowsPerPage={handleLimitChange}
         page={page}
         rowsPerPage={limit}
-        rowsPerPageOptions={[5, 10, 25]}
+        rowsPerPageOptions={[10, 25, 50, 100, { label: 'All', value: -1 }]}
       />
     </Card>
   );
@@ -282,12 +287,15 @@ const CustomTableCell = ({
   const classes = useStyles();
   const data = {
     moduleCategoryName: rowData.moduleCategoryName,
-    moduleId: rowData.moduleId
+    moduleId: rowData.moduleId,
+    moduleName: rowData.moduleName
   };
 
-  console.log(rowData);
   useEffect(() => {
-    setFormValue({ ...data });
+    // sets formValue if it is empty
+    if (Object.keys(formValue).length === 0) setFormValue({ ...data });
+
+    // save original data
     setOriginalFormVal({ ...data });
   }, []);
   return (
@@ -306,12 +314,6 @@ const CustomTableCell = ({
           </TableCell>
           <TableCell>
             <section align="left" className={classes.tableCell}>
-              {/* <Input
-                value={formValue.moduleName}
-                name="moduleName"
-                onChange={(e) => onInputChange(e)}
-                className={classes.input}
-              /> */}
               <Select
                 labelId="SelectModule"
                 id="SelectModule"
@@ -332,10 +334,18 @@ const CustomTableCell = ({
       ) : (
         <>
           <TableCell>
-            <Typography>{rowData.moduleCategoryName}</Typography>
+            <Typography>
+              {formValue.hasOwnProperty('moduleCategoryName')
+                ? formValue.moduleCategoryName
+                : rowData.moduleCategoryName}
+            </Typography>
           </TableCell>
           <TableCell>
-            <Typography>{rowData.moduleName}</Typography>
+            <Typography>
+              {formValue.hasOwnProperty('moduleName')
+                ? formValue.moduleName
+                : rowData.moduleName}
+            </Typography>
           </TableCell>
         </>
       )}
