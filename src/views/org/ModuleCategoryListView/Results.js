@@ -29,6 +29,7 @@ import DataRow from '../DataRow';
 import { connect } from 'react-redux';
 import * as actions from 'src/redux/actions/organization/moduleCategory';
 import ButtonGroup from '@material-ui/core/ButtonGroup';
+import { toast } from 'react-toastify';
 
 const useStyles = makeStyles((theme) => ({
   root: {},
@@ -47,7 +48,6 @@ const Results = ({
   ...rest
 }) => {
   const classes = useStyles();
-  const [selectedCustomerIds, setSelectedCustomerIds] = useState([]);
   const [selectedItems, setSelectedItems] = useState([]);
   const [isSorting, setIsSorting] = useState(false);
   const [sortOrder, setSortOrder] = useState('asc');
@@ -164,7 +164,7 @@ const Results = ({
 
   const deleteSelected = () => {
     const onSuccess = () => {
-      addToast('Delete successfully', { appearance: 'success' });
+      toast.success('Deleted successfully');
     };
     deleteModuleCategory(selectedItems, onSuccess);
     setSelectedItems([]);

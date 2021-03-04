@@ -8,6 +8,7 @@ import theme from 'src/theme';
 import routes from 'src/routes';
 import { Provider } from 'react-redux';
 import store from './redux/actions/store';
+import { ToastContainer } from 'react-toastify';
 
 const App = () => {
   const routing = useRoutes(routes);
@@ -18,6 +19,7 @@ const App = () => {
         <GlobalStyles />
         {routing}
       </ThemeProvider>
+      <ToastContainer />
     </Provider>
   );
 };

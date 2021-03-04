@@ -12,17 +12,8 @@ import EditIcon from '@material-ui/icons/Edit';
 import SaveIcon from '@material-ui/icons/Save';
 import CloseIcon from '@material-ui/icons/Close';
 import PropTypes from 'prop-types';
-import { useToasts } from 'react-toast-notifications';
+import { toast } from 'react-toastify';
 
-function validateData(data) {
-  const validData = {};
-  if (data.ids) validData.ids = data.ids;
-  if (data.moduleName) validData.moduleName = data.moduleName;
-  if (data.moduleCategoryName)
-    validData.moduleCategoryName = data.moduleCategoryName;
-
-  return validData;
-}
 const useStyles = makeStyles((theme) => ({
   root: {
     width: '100%',
@@ -60,7 +51,6 @@ const DataRow = ({
   modulesList
 }) => {
   const classes = useStyles();
-  const { addToast } = useToasts();
 
   const [editing, setEditing] = useState(false);
   const [isHover, setIsHover] = useState(false);
@@ -109,7 +99,7 @@ const DataRow = ({
 
   const deleteThis = (id) => {
     const onSuccess = () => {
-      addToast('Delete successfully', { appearance: 'success' });
+      toast.success('Delete successfully');
     };
     deleteData(id, onSuccess);
 

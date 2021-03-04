@@ -16,7 +16,7 @@ import {
 } from '@material-ui/core';
 import { connect } from 'react-redux';
 import * as actions from 'src/redux/actions/organization/moduleCategory';
-import { useToasts } from 'react-toast-notifications';
+import { toast } from 'react-toastify';
 
 const useStyles = makeStyles((theme) => ({
   root: {}
@@ -29,8 +29,6 @@ const Toolbar = ({ className, modulesList, addModuleCategory, ...rest }) => {
     moduleCategoryName: '',
     moduleName: ''
   });
-  const { addToast } = useToasts();
-
   const handleInputeChange = (e) => {
     const value = e.target.value;
     const name = e.target.name;
@@ -51,7 +49,7 @@ const Toolbar = ({ className, modulesList, addModuleCategory, ...rest }) => {
   const handleSubmit = (e) => {
     e.preventDefault();
     const onSuccess = () => {
-      addToast('Submitted successfully', { appearance: 'success' });
+      toast.success('Added successfully');
     };
     if (formState.moduleId != '' && formState.moduleCategoryName != '') {
       addModuleCategory(formState, onSuccess);

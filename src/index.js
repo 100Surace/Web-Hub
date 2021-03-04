@@ -3,13 +3,11 @@ import ReactDOM from 'react-dom';
 import { BrowserRouter } from 'react-router-dom';
 import * as serviceWorker from './serviceWorker';
 import App from './App';
-import { ToastProvider } from 'react-toast-notifications';
+import 'react-toastify/dist/ReactToastify.css';
 
 ReactDOM.render(
   <BrowserRouter>
-    <ToastProvider autoDismiss>
-      <App />
-    </ToastProvider>
+    <App />
   </BrowserRouter>,
   document.getElementById('root')
 );
