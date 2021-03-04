@@ -14,6 +14,7 @@ import {
   TableRow,
   Typography,
   Button,
+  TableSortLabel,
   TextField,
   InputAdornment,
   SvgIcon,
@@ -123,7 +124,7 @@ const Results = ({
     const value = e.target.value;
     setSearchInput(value);
     const result = moduleCategoryList.filter((category) =>
-      category.moduleName.toLowerCase().includes(value.toLowerCase())
+      category.moduleCategoryName.toLowerCase().includes(value.toLowerCase())
     );
     setSearchList(result);
   };
@@ -136,6 +137,31 @@ const Results = ({
     setPage(newPage);
     checkAll(selectedItems);
   };
+
+  const handleRequestSort = (column) => {
+    let result = [];
+    setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+    if (sortOrder === 'desc') {
+      result = searchList.sort((a, b) =>
+        a[column].toLowerCase() > b[column].toLowerCase()
+          ? 1
+          : b[column].toLowerCase() > a[column].toLowerCase()
+          ? -1
+          : 0
+      );
+    } else {
+      result = searchList.sort((a, b) =>
+        a[column].toLowerCase() < b[column].toLowerCase()
+          ? 1
+          : b[column].toLowerCase() < a[column].toLowerCase()
+          ? -1
+          : 0
+      );
+    }
+    setSearchList(result);
+    setIsSorting(true);
+  };
+
   const deleteSelected = () => {
     const onSuccess = () => {
       addToast('Delete successfully', { appearance: 'success' });
@@ -216,30 +242,48 @@ const Results = ({
                     onChange={handleSelectAll}
                   />
                 </TableCell>
-                <TableCell>Category Name</TableCell>
-                <TableCell>Module Name</TableCell>
+                <TableCell
+                  onClick={() => handleRequestSort('moduleCategoryName')}
+                  style={{ cursor: 'pointer' }}
+                >
+                  <TableSortLabel>Category Name</TableSortLabel>
+                </TableCell>
+                <TableCell
+                  onClick={() => handleRequestSort('moduleName')}
+                  style={{ cursor: 'pointer' }}
+                >
+                  <TableSortLabel>Module Name</TableSortLabel>
+                </TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
-              {moduleCategoryList
-                .slice(page * limit, page * limit + limit)
-                .map((moduleCategory) => (
-                  <DataRow
-                    key={moduleCategory.ids}
-                    rowData={moduleCategory}
-                    selectedItems={selectedItems}
-                    handleSelectOne={handleSelectOne}
-                    updateData={updateModuleCategory}
-                    deleteData={deleteModuleCategory}
-                    setSelectedItems={setSelectedItems}
-                    setSearchInput={setSearchInput}
-                    setIsSorting={setIsSorting}
-                    disableHover={disableHover}
-                    setDisableHover={setDisableHover}
-                    CustomTableCell={CustomTableCell}
-                    modulesList={modulesList}
-                  />
-                ))}
+              {searchList.length !== 0 ? (
+                searchList
+                  .slice(page * limit, page * limit + limit)
+                  .map((moduleCategory) => (
+                    <DataRow
+                      key={moduleCategory.ids}
+                      rowData={moduleCategory}
+                      selectedItems={selectedItems}
+                      handleSelectOne={handleSelectOne}
+                      updateData={updateModuleCategory}
+                      deleteData={deleteModuleCategory}
+                      setSelectedItems={setSelectedItems}
+                      setSearchInput={setSearchInput}
+                      setIsSorting={setIsSorting}
+                      disableHover={disableHover}
+                      setDisableHover={setDisableHover}
+                      CustomTableCell={CustomTableCell}
+                      modulesList={modulesList}
+                    />
+                  ))
+              ) : (
+                <TableRow
+                  style={{ width: '100%', textAlign: 'center', color: '#777' }}
+                >
+                  <TableSortLabel>No Matching Result</TableSortLabel>
+                </TableRow>
+              )}
             </TableBody>
           </Table>
         </Box>

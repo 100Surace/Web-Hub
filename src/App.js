@@ -7,7 +7,6 @@ import 'src/mixins/chartjs';
 import theme from 'src/theme';
 import routes from 'src/routes';
 import { Provider } from 'react-redux';
-import { ToastProvider } from 'react-toast-notifications';
 import store from './redux/actions/store';
 
 const App = () => {
@@ -15,12 +14,10 @@ const App = () => {
 
   return (
     <Provider store={store}>
-      <ToastProvider autoDismiss>
-        <ThemeProvider theme={theme}>
-          <GlobalStyles />
-          {routing}
-        </ThemeProvider>
-      </ToastProvider>
+      <ThemeProvider theme={theme}>
+        <GlobalStyles />
+        {routing}
+      </ThemeProvider>
     </Provider>
   );
 };
