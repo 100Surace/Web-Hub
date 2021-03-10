@@ -41,10 +41,8 @@ const DataRow = ({
   rowData,
   selectedItems,
   handleSelectOne,
-  deleteData,
-  setSelectedItems,
-  setSearchInput,
-  setIsSorting,
+  setDeletId,
+  setConfirmDeleteModal,
   disableHover,
   setDisableHover,
   CustomTableCell,
@@ -98,14 +96,8 @@ const DataRow = ({
   };
 
   const deleteThis = (id) => {
-    const onSuccess = () => {
-      toast.success('Delete successfully');
-    };
-    deleteData(id, onSuccess);
-
-    setSelectedItems([]);
-    setSearchInput('');
-    setIsSorting(false);
+    setDeletId(id);
+    setConfirmDeleteModal(true);
   };
   return (
     <TableRow

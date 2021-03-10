@@ -28,9 +28,10 @@ import { Search as SearchIcon } from 'react-feather';
 import EditIcon from '@material-ui/icons/Edit';
 import SaveIcon from '@material-ui/icons/Save';
 import CloseIcon from '@material-ui/icons/Close';
-import { useToasts } from 'react-toast-notifications';
+import { toast } from 'react-toastify';
 import { connect } from 'react-redux';
 import * as actions from 'src/redux/actions/organization/module';
+import ConfirmDelete from 'src/views/modals/ConfirmDelete/index';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -60,10 +61,11 @@ const Results = ({
   modulesList,
   deleteModule,
   updateModule,
+  setConfirmDeleteModal,
+  confirmDeleteModal,
   ...rest
 }) => {
   const classes = useStyles();
-  const { addToast } = useToasts();
 
   const [limit, setLimit] = useState(10);
   const [page, setPage] = useState(0);
@@ -77,6 +79,7 @@ const Results = ({
   const [disableHover, setDisableHover] = useState(false);
   const [isCheckAll, setIsCheckAll] = useState(false);
   const [selectedPerPage, setSelectedPerPage] = useState([]);
+  const [deleteId, setDeletId] = useState(0);
 
   const handleSelectAll = (event) => {
     let newSelectedModuleIds;
@@ -184,13 +187,23 @@ const Results = ({
   };
 
   const deleteSelected = () => {
+    setConfirmDeleteModal(true);
+  };
+
+  const confirmDelete = () => {
     const onSuccess = () => {
-      addToast('Delete successfully', { appearance: 'success' });
+      toast.success('Deleted successfully');
     };
-    deleteModule(selectedItems, onSuccess);
+    if (deleteId) {
+      deleteModule(deleteId, onSuccess);
+      setDeletId(0);
+    } else deleteModule(selectedItems, onSuccess);
+
     setSelectedItems([]);
     setSearchInput('');
     setIsSorting(false);
+    setSelectedPerPage([]);
+    setConfirmDeleteModal(false);
   };
 
   const clearSelection = () => {
@@ -215,108 +228,120 @@ const Results = ({
     }
   });
   return (
-    <Card className={clsx(classes.root, className)} {...rest}>
-      <TableToolbar
-        title="Modules"
-        numSelected={selectedItems.length}
-        deleteSelected={deleteSelected}
-        clearSelection={clearSelection}
-      />
-      <Box maxWidth={500}>
-        <TextField
-          fullWidth
-          InputProps={{
-            startAdornment: (
-              <InputAdornment position="start">
-                <SvgIcon fontSize="small" color="action">
-                  <SearchIcon />
-                </SvgIcon>
-              </InputAdornment>
-            )
-          }}
-          placeholder="Search module"
-          variant="outlined"
-          value={searchInput}
-          onChange={onSearching}
+    <>
+      {confirmDeleteModal ? (
+        <ConfirmDelete
+          setConfirmDeleteModal={setConfirmDeleteModal}
+          confirmDelete={confirmDelete}
         />
-        <ButtonGroup
-          variant="contained"
-          color="primary"
-          aria-label="contained primary button group"
-        >
-          <Button>Import</Button>
-          <Button>Export</Button>
-        </ButtonGroup>
-      </Box>
-      <PerfectScrollbar>
-        <Box minWidth={1050}>
-          <Table>
-            <TableHead>
-              <TableRow>
-                <TableCell padding="checkbox">
-                  <Checkbox
-                    checked={isCheckAll}
-                    color="primary"
-                    indeterminate={
-                      selectedPerPage.length > 0 &&
-                      selectedPerPage.length < currentList.length
-                    }
-                    onChange={handleSelectAll}
-                  />
-                </TableCell>
-                {headCells.map((headCell) => (
-                  <TableCell
-                    key={headCell.id}
-                    align={headCell.numeric ? 'right' : 'left'}
-                    padding={headCell.disablePadding ? 'none' : 'default'}
-                    style={{ cursor: 'pointer' }}
-                    onClick={handleRequestSort}
-                  >
-                    <TableSortLabel>{headCell.label}</TableSortLabel>
-                  </TableCell>
-                ))}
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {searchList.length !== 0 ? (
-                searchList
-                  .slice(page * limit, page * limit + limit)
-                  .map((module) => (
-                    <DataRow
-                      key={module.ids}
-                      module={module}
-                      selectedItems={selectedItems}
-                      handleSelectOne={handleSelectOne}
-                      updateModule={updateModule}
-                      deleteModule={deleteModule}
-                      setSelectedItems={setSelectedItems}
-                      setSearchInput={setSearchInput}
-                      setIsSorting={setIsSorting}
-                      disableHover={disableHover}
-                      setDisableHover={setDisableHover}
-                    />
-                  ))
-              ) : (
-                <TableRow
-                  style={{ width: '100%', textAlign: 'center', color: '#777' }}
-                >
-                  <TableSortLabel>No Matching Result</TableSortLabel>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
+      ) : (
+        ''
+      )}
+      <Card className={clsx(classes.root, className)} {...rest}>
+        <TableToolbar
+          title="Modules"
+          numSelected={selectedItems.length}
+          deleteSelected={deleteSelected}
+          clearSelection={clearSelection}
+        />
+        <Box maxWidth={500}>
+          <TextField
+            fullWidth
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <SvgIcon fontSize="small" color="action">
+                    <SearchIcon />
+                  </SvgIcon>
+                </InputAdornment>
+              )
+            }}
+            placeholder="Search module"
+            variant="outlined"
+            value={searchInput}
+            onChange={onSearching}
+          />
+          <ButtonGroup
+            variant="contained"
+            color="primary"
+            aria-label="contained primary button group"
+          >
+            <Button>Import</Button>
+            <Button>Export</Button>
+          </ButtonGroup>
         </Box>
-      </PerfectScrollbar>
-      <TablePagination
-        component="div"
-        count={searchList.length}
-        onChangePage={handlePageChange}
-        onChangeRowsPerPage={handleLimitChange}
-        page={page}
-        rowsPerPage={limit}
-        rowsPerPageOptions={[10, 25, 50, 100, { label: 'All', value: -1 }]}
-      />
-    </Card>
+        <PerfectScrollbar>
+          <Box minWidth={1050}>
+            <Table>
+              <TableHead>
+                <TableRow>
+                  <TableCell padding="checkbox">
+                    <Checkbox
+                      checked={isCheckAll}
+                      color="primary"
+                      indeterminate={
+                        selectedPerPage.length > 0 &&
+                        selectedPerPage.length < currentList.length
+                      }
+                      onChange={handleSelectAll}
+                    />
+                  </TableCell>
+                  {headCells.map((headCell) => (
+                    <TableCell
+                      key={headCell.id}
+                      align={headCell.numeric ? 'right' : 'left'}
+                      padding={headCell.disablePadding ? 'none' : 'default'}
+                      style={{ cursor: 'pointer' }}
+                      onClick={handleRequestSort}
+                    >
+                      <TableSortLabel>{headCell.label}</TableSortLabel>
+                    </TableCell>
+                  ))}
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {searchList.length !== 0 ? (
+                  searchList
+                    .slice(page * limit, page * limit + limit)
+                    .map((module) => (
+                      <DataRow
+                        key={module.ids}
+                        module={module}
+                        selectedItems={selectedItems}
+                        handleSelectOne={handleSelectOne}
+                        updateModule={updateModule}
+                        disableHover={disableHover}
+                        setDisableHover={setDisableHover}
+                        setConfirmDeleteModal={setConfirmDeleteModal}
+                        setDeletId={setDeletId}
+                      />
+                    ))
+                ) : (
+                  <TableRow
+                    style={{
+                      width: '100%',
+                      textAlign: 'center',
+                      color: '#777'
+                    }}
+                  >
+                    <TableSortLabel>No Matching Result</TableSortLabel>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </Box>
+        </PerfectScrollbar>
+        <TablePagination
+          component="div"
+          count={searchList.length}
+          onChangePage={handlePageChange}
+          onChangeRowsPerPage={handleLimitChange}
+          page={page}
+          rowsPerPage={limit}
+          rowsPerPageOptions={[10, 25, 50, 100, { label: 'All', value: -1 }]}
+        />
+      </Card>
+    </>
   );
 };
 
@@ -334,15 +359,11 @@ const DataRow = ({
   module,
   selectedItems,
   handleSelectOne,
-  deleteModule,
-  setSelectedItems,
-  setSearchInput,
-  setIsSorting,
   disableHover,
-  setDisableHover
+  setDisableHover,
+  setConfirmDeleteModal,
+  setDeletId
 }) => {
-  const { addToast } = useToasts();
-
   const [input, setInput] = useState(module.moduleName);
   const [editing, setEditing] = useState(false);
   const [isHover, setIsHover] = useState(false);
@@ -381,14 +402,8 @@ const DataRow = ({
   };
 
   const deleteThis = (id) => {
-    const onSuccess = () => {
-      addToast('Delete successfully', { appearance: 'success' });
-    };
-    deleteModule(id, onSuccess);
-
-    setSelectedItems([]);
-    setSearchInput('');
-    setIsSorting(false);
+    setDeletId(id);
+    setConfirmDeleteModal(true);
   };
   return (
     <TableRow

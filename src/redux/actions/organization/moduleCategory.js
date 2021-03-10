@@ -33,7 +33,7 @@ export const Create = (data, onSuccess) => (dispatch) => {
     .then((res) => {
       dispatch({
         type: ACTION_TYPES.CREATE,
-        payload: data
+        payload: { ids: res.data.ids, ...data }
       });
       onSuccess();
     })

@@ -1,0 +1,61 @@
+.modal {
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 1.5em;
+  position: fixed;
+  z-index: 9999;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.modal .modal-wrapper {
+  background: white;
+  border-radius: 5px;
+  padding: 10px;
+}
+.modal .modal-wrapper > h4 {
+  padding: 10px;
+  border-radius: 5px 5px 0px 0px;
+  color: #444;
+}
+.modal .modal-wrapper .heading {
+  display: flex;
+  align-items: center;
+  color: red;
+}
+.modal .modal-wrapper .heading svg {
+  font-size: 50px;
+  margin-right: 10px;
+}
+.modal .modal-wrapper .heading h4 {
+  color: #444;
+}
+.modal .modal-wrapper .heading p {
+  font-size: 0.7em;
+  color: #999;
+}
+.modal .modal-wrapper > section {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 15px;
+}
+.modal .modal-wrapper > section > button {
+  padding: 10px;
+  min-width: 100px;
+  color: white;
+  border-radius: 2px;
+  border: none;
+  cursor: pointer;
+}
+.modal .modal-wrapper > section > button.btn-cancel {
+  background: #adadad;
+  margin-right: 10px;
+}
+.modal .modal-wrapper > section > button.btn-delete {
+  background: red;
+  margin-left: 10px;
+}

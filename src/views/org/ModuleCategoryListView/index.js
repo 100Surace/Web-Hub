@@ -23,6 +23,7 @@ const ModuleCategoryListView = ({
   moduleCategoryList
 }) => {
   const classes = useStyles();
+  const [confirmDeleteModal, setConfirmDeleteModal] = useState(false);
 
   useEffect(() => {
     fetchModuleCategory();
@@ -37,6 +38,8 @@ const ModuleCategoryListView = ({
           <Results
             moduleCategoryList={moduleCategoryList}
             modulesList={modulesList}
+            setConfirmDeleteModal={setConfirmDeleteModal}
+            confirmDeleteModal={confirmDeleteModal}
           />
         </Box>
       </Container>

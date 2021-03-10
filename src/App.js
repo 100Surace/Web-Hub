@@ -19,7 +19,7 @@ const App = () => {
         <GlobalStyles />
         {routing}
       </ThemeProvider>
-      <ToastContainer />
+      <ToastContainer autoClose={2000} />
     </Provider>
   );
 };

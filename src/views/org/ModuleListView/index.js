@@ -19,6 +19,8 @@ const useStyles = makeStyles((theme) => ({
 const ModuleListView = ({ fetchModules, modulesList }) => {
   const classes = useStyles();
 
+  const [confirmDeleteModal, setConfirmDeleteModal] = useState(false);
+
   useEffect(() => {
     fetchModules();
   });
@@ -29,7 +31,11 @@ const ModuleListView = ({ fetchModules, modulesList }) => {
         <Toolbar />
         <Box mt={3}>
           {/* passing props to Result child component */}
-          <Results modulesList={modulesList} />
+          <Results
+            modulesList={modulesList}
+            setConfirmDeleteModal={setConfirmDeleteModal}
+            confirmDeleteModal={confirmDeleteModal}
+          />
         </Box>
       </Container>
     </Page>

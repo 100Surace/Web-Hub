@@ -10,7 +10,7 @@ import {
   CardContent,
   makeStyles
 } from '@material-ui/core';
-import { useToasts } from 'react-toast-notifications';
+import { toast } from 'react-toastify';
 import { connect } from 'react-redux';
 import * as actions from 'src/redux/actions/organization/module';
 
@@ -30,8 +30,6 @@ const Toolbar = ({
 }) => {
   const classes = useStyles();
 
-  const { addToast } = useToasts();
-
   const onChange = (e) => {
     onInputChange(e.target.value);
   };
@@ -39,7 +37,7 @@ const Toolbar = ({
   const handleSubmit = (e) => {
     e.preventDefault();
     const onSuccess = () => {
-      addToast('Submitted successfully', { appearance: 'success' });
+      toast.success('Submitted successfully');
     };
 
     if (form.moduleName !== '') {
