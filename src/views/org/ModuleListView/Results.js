@@ -304,6 +304,7 @@ const Results = ({
                   searchList
                     .slice(page * limit, page * limit + limit)
                     .map((module) => (
+                      // passing essential props to DatatRow component
                       <DataRow
                         key={module.ids}
                         module={module}
@@ -354,6 +355,7 @@ const mapActionToProps = {
 
 export default connect(mapStateToProps, mapActionToProps)(Results);
 
+//
 const DataRow = ({
   updateModule,
   module,

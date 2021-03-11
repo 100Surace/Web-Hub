@@ -1,0 +1,13 @@
+body {
+  font-family: Verdana, Geneva, Tahoma, sans-serif;
+}
+.formgroup {
+  margin-right: 10px;
+  min-width: 200px;
+  display: flex;
+  flex-direction: column;
+}
+.formgroup .form-error {
+  color: red;
+  font-size: 0.8em;
+}

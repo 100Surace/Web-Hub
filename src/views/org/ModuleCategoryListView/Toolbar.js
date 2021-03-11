@@ -29,6 +29,8 @@ const Toolbar = ({ className, modulesList, addModuleCategory, ...rest }) => {
     moduleCategoryName: '',
     moduleName: ''
   });
+  const [error, setError] = useState('');
+
   const handleInputeChange = (e) => {
     const value = e.target.value;
     const name = e.target.name;
@@ -42,19 +44,38 @@ const Toolbar = ({ className, modulesList, addModuleCategory, ...rest }) => {
         moduleId: value,
         moduleName: module.moduleName
       });
-    } else if (name === 'moduleCategoryName')
+    } else if (name === 'moduleCategoryName') {
       setFormState({ ...formState, moduleCategoryName: value });
+    }
   };
-
+  const validateInput = (e) => {
+    const name = e.target.name;
+    if (name === 'moduleCategoryName') {
+      if (formState.moduleCategoryName.length < 2) {
+        setError({
+          ...error,
+          moduleCategory: 'Minimum 2 characters are required'
+        });
+      } else {
+        setError({ ...error, moduleCategory: '' });
+      }
+    } else {
+      if (!formState.moduleId)
+        setError({ ...error, module: 'Module is required' });
+      else setError({ ...error, module: '' });
+    }
+  };
   const handleSubmit = (e) => {
     e.preventDefault();
-    const onSuccess = () => {
-      toast.success('Added successfully');
-    };
-    if (formState.moduleId != '' && formState.moduleCategoryName != '') {
-      addModuleCategory(formState, onSuccess);
+    if (error.module === '' && error.moduleCategory === '') {
+      const onSuccess = () => {
+        toast.success('Added successfully');
+      };
+      if (formState.moduleId != '' && formState.moduleCategoryName != '') {
+        addModuleCategory(formState, onSuccess);
+      }
+      setFormState({ ...formState, moduleId: '', moduleCategoryName: '' });
     }
-    setFormState({ ...formState, moduleId: '', moduleCategoryName: '' });
   };
 
   const handleEnter = (e) => {
@@ -69,54 +90,68 @@ const Toolbar = ({ className, modulesList, addModuleCategory, ...rest }) => {
         <Card>
           <CardContent>
             <Box maxWidth={800} display="flex">
-              <FormControl
-                variant="outlined"
-                className={classes.formControl}
-                fullWidth
-                required
-              >
-                <InputLabel id="demo-simple-select-outlined-label">
-                  Select Module
-                </InputLabel>
-                <Select
-                  labelId="SelectModule"
-                  id="SelectModule"
-                  value={formState.moduleId}
-                  onChange={handleInputeChange}
-                  label="Select Module"
-                  name="moduleId"
+              <div className="formgroup">
+                <FormControl
+                  variant="outlined"
+                  className={classes.formControl}
+                  fullWidth
+                  required
                 >
-                  {modulesList.map(({ ids, moduleName }) => (
-                    <MenuItem key={ids} value={ids}>
-                      {moduleName}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-              <TextField
-                fullWidth
-                required
-                InputProps={{
-                  endAdornment: (
-                    <InputAdornment position="start">
-                      <Button
-                        color="primary"
-                        variant="contained"
-                        size="small"
-                        onClick={handleSubmit}
-                      >
-                        Add
-                      </Button>
-                    </InputAdornment>
-                  )
-                }}
-                value={formState.moduleCategoryName}
-                placeholder="Module Category"
-                variant="outlined"
-                onChange={(e) => handleInputeChange(e)}
-                name="moduleCategoryName"
-                onKeyDown={handleEnter}
-              />
+                  <InputLabel id="demo-simple-select-outlined-label">
+                    Select Module
+                  </InputLabel>
+                  <Select
+                    labelId="SelectModule"
+                    id="SelectModule"
+                    value={formState.moduleId}
+                    onChange={handleInputeChange}
+                    label="Select Module"
+                    name="moduleId"
+                  >
+                    {modulesList.map(({ ids, moduleName }) => (
+                      <MenuItem key={ids} value={ids} onBlur={validateInput}>
+                        {moduleName}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+                {error.module !== '' ? (
+                  <span className="form-error">{error.module}</span>
+                ) : (
+                  ''
+                )}
+              </div>
+              <div className="formgroup">
+                <TextField
+                  required
+                  InputProps={{
+                    endAdornment: (
+                      <InputAdornment position="start">
+                        <Button
+                          color="primary"
+                          variant="contained"
+                          size="small"
+                          onClick={handleSubmit}
+                        >
+                          Add
+                        </Button>
+                      </InputAdornment>
+                    )
+                  }}
+                  value={formState.moduleCategoryName}
+                  placeholder="Module Category"
+                  variant="outlined"
+                  onChange={(e) => handleInputeChange(e)}
+                  name="moduleCategoryName"
+                  onKeyDown={handleEnter}
+                  onBlur={validateInput}
+                />
+                {error.moduleCategory !== '' ? (
+                  <span className="form-error">{error.moduleCategory}</span>
+                ) : (
+                  ''
+                )}
+              </div>
             </Box>
           </CardContent>
         </Card>

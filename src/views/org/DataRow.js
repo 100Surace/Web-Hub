@@ -35,7 +35,7 @@ const useStyles = makeStyles((theme) => ({
     height: 40
   }
 }));
-
+// Getting props from Parent
 const DataRow = ({
   updateData,
   rowData,
@@ -54,6 +54,7 @@ const DataRow = ({
   const [isHover, setIsHover] = useState(false);
   const [editId, setEditId] = useState(0);
   const [formValue, setFormValue] = useState({});
+  // storing initial/orginal row data in state
   const [originalValue, setOriginalFormVal] = useState();
 
   const onEdit = (id) => {
@@ -69,7 +70,7 @@ const DataRow = ({
     setDisableHover(false);
     setEditId(0);
   };
-
+  // typing state
   const onInputChange = (e) => {
     const value = e.target.value;
     setFormValue({ ...formValue, [e.target.name]: value });
@@ -94,7 +95,7 @@ const DataRow = ({
   const onMouseLeaveHandler = (e) => {
     setIsHover(false);
   };
-
+  // Delete current data row
   const deleteThis = (id) => {
     setDeletId(id);
     setConfirmDeleteModal(true);
