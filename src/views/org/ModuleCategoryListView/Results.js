@@ -205,11 +205,11 @@ const Results = ({
       JSON.stringify(moduleCategoryList) !== JSON.stringify(oldList)
     ) {
       setOldList(moduleCategoryList);
-      setSearchList(moduleCategoryList);
-    }
-
-    if (dataCount <= limit) {
-      setPage(0);
+      setSearchList(moduleCategoryList); // set page to 0 and set new limit when row per page is all
+      if (limit === searchList.length) {
+        setLimit(modulesList.length);
+        setPage(0);
+      }
     }
   });
   return (
@@ -325,7 +325,13 @@ const Results = ({
           onChangeRowsPerPage={handleLimitChange}
           page={page}
           rowsPerPage={limit}
-          rowsPerPageOptions={[10, 25, 50, 100, { label: 'All', value: -1 }]}
+          rowsPerPageOptions={[
+            10,
+            25,
+            50,
+            100,
+            { label: 'All', value: searchList.length }
+          ]}
         />
       </Card>
     </>
@@ -361,8 +367,9 @@ const CustomTableCell = ({
   modulesList
 }) => {
   const classes = useStyles();
+
+  // re-render if rowData is changed
   useEffect(() => {
-    // console.log(rowData);
     const data = {
       moduleCategoryName: rowData.moduleCategoryName,
       moduleId: rowData.moduleId,
@@ -373,7 +380,7 @@ const CustomTableCell = ({
 
     // save original data
     setOriginalFormVal({ ...data });
-  }, [Object.values(rowData)]);
+  }, [rowData.moduleCategoryList, rowData.moduleName, rowData.moduleId]);
   return (
     <>
       {isEditMode ? (

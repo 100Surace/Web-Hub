@@ -213,6 +213,7 @@ const Results = ({
   currentList = searchList
     .slice(page * limit, page * limit + limit)
     .map((module) => module.ids);
+
   useEffect(() => {
     for (let i = 0; i < currentList.length; i++) {
       if (selectedItems.includes(currentList[i])) setIsCheckAll(true);
@@ -225,6 +226,11 @@ const Results = ({
     ) {
       setOldList(modulesList);
       setSearchList(modulesList);
+      // set page to 0 and set new limit when row per page is all
+      if (limit === searchList.length) {
+        setLimit(modulesList.length);
+        setPage(0);
+      }
     }
   });
   return (
@@ -339,7 +345,13 @@ const Results = ({
           onChangeRowsPerPage={handleLimitChange}
           page={page}
           rowsPerPage={limit}
-          rowsPerPageOptions={[10, 25, 50, 100, { label: 'All', value: -1 }]}
+          rowsPerPageOptions={[
+            10,
+            25,
+            50,
+            100,
+            { label: 'All', value: searchList.length }
+          ]}
         />
       </Card>
     </>
