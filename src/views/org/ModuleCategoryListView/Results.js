@@ -199,13 +199,15 @@ const Results = ({
       if (selectedItems.includes(currentList[i])) setIsCheckAll(true);
       else setIsCheckAll(false);
     }
-    if (searchInput == '' && !isSorting) {
-      setOldList(moduleCategoryList);
-      setSearchList(moduleCategoryList);
-    } else if (dataCount !== Object.keys(oldList).length) {
+    if (
+      searchInput == '' &&
+      !isSorting &&
+      JSON.stringify(moduleCategoryList) !== JSON.stringify(oldList)
+    ) {
       setOldList(moduleCategoryList);
       setSearchList(moduleCategoryList);
     }
+
     if (dataCount <= limit) {
       setPage(0);
     }
@@ -359,19 +361,19 @@ const CustomTableCell = ({
   modulesList
 }) => {
   const classes = useStyles();
-  const data = {
-    moduleCategoryName: rowData.moduleCategoryName,
-    moduleId: rowData.moduleId,
-    moduleName: rowData.moduleName
-  };
-
   useEffect(() => {
+    // console.log(rowData);
+    const data = {
+      moduleCategoryName: rowData.moduleCategoryName,
+      moduleId: rowData.moduleId,
+      moduleName: rowData.moduleName
+    };
     // sets formValue if it is empty
-    if (Object.keys(formValue).length === 0) setFormValue({ ...data });
+    setFormValue({ ...data });
 
     // save original data
     setOriginalFormVal({ ...data });
-  }, []);
+  }, [Object.values(rowData)]);
   return (
     <>
       {isEditMode ? (
