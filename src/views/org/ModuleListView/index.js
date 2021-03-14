@@ -4,6 +4,7 @@ import Page from 'src/components/Page';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import * as actions from 'src/redux/actions/organization/module';
+import { resetState } from 'src/redux/actions/dataTable';
 import Results from './Results';
 import Toolbar from './Toolbar';
 
@@ -16,15 +17,19 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-const ModuleListView = ({ fetchModules, modulesList }) => {
+const ModuleListView = ({ fetchModules, modulesList, resetState }) => {
   const classes = useStyles();
 
   const [confirmDeleteModal, setConfirmDeleteModal] = useState(false);
 
   useEffect(() => {
     fetchModules();
-  });
+    resetState();
+  }, []);
 
+  // useEffect(() => {
+  //   resetState();
+  // }, []);
   return (
     <Page className={classes.root} title="Modules">
       <Container maxWidth={false}>
@@ -54,7 +59,8 @@ const mapStateToProps = (state) => ({
 });
 
 const mapActionToProps = {
-  fetchModules: actions.fetchAll
+  fetchModules: actions.fetchAll,
+  resetState: resetState
 };
 
 export default connect(mapStateToProps, mapActionToProps)(ModuleListView);

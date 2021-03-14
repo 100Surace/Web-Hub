@@ -45,50 +45,52 @@ const TableToolbar = ({
         [classes.highlight]: numSelected > 0
       })}
     >
-      {numSelected > 0 ? (
-        <Typography
-          className={classes.title}
-          color="inherit"
-          variant="subtitle1"
-          component="div"
-          style={{ color: 'red' }}
-        >
-          {numSelected} selected
-        </Typography>
-      ) : (
-        <Typography
-          className={classes.title}
-          variant="h6"
-          id="tableTitle"
-          component="div"
-        >
-          {title}
-        </Typography>
-      )}
+      <section className="table-toolbar">
+        {numSelected > 0 ? (
+          <Typography
+            className={classes.title}
+            color="inherit"
+            variant="subtitle1"
+            component="div"
+            className=""
+          >
+            {numSelected} selected
+          </Typography>
+        ) : (
+          <Typography
+            className={classes.title}
+            variant="h6"
+            id="tableTitle"
+            component="div"
+          >
+            {title}
+          </Typography>
+        )}
 
-      {numSelected > 0 ? (
-        <>
-          <Tooltip title="Clear Selection">
-            <IconButton onClick={clearSelection}> Clear</IconButton>
-          </Tooltip>
-          <Tooltip title="Export">
-            <IconButton>
-              <GetAppIcon />
+        {numSelected > 0 ? (
+          <div>
+            <Tooltip title="Clear Selection">
+              <IconButton onClick={clearSelection}> Clear</IconButton>
+            </Tooltip>
+            <Tooltip title="Export">
+              <IconButton>
+                <GetAppIcon />
+              </IconButton>
+            </Tooltip>
+            <Tooltip title="Delete">
+              <IconButton onClick={deleteSelected} aria-label="delete">
+                <DeleteIcon />
+              </IconButton>
+            </Tooltip>
+          </div>
+        ) : (
+          <Tooltip title="Filter list">
+            <IconButton aria-label="filter list">
+              <FilterListIcon />
             </IconButton>
           </Tooltip>
-          <Tooltip title="Delete">
-            <IconButton onClick={deleteSelected} aria-label="delete">
-              <DeleteIcon />
-            </IconButton>
-          </Tooltip>
-        </>
-      ) : (
-        <Tooltip title="Filter list">
-          <IconButton aria-label="filter list">
-            <FilterListIcon />
-          </IconButton>
-        </Tooltip>
-      )}
+        )}
+      </section>
     </Toolbar>
   );
 };

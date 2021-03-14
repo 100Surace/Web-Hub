@@ -31,6 +31,7 @@ import * as actions from 'src/redux/actions/organization/moduleCategory';
 import ButtonGroup from '@material-ui/core/ButtonGroup';
 import { toast } from 'react-toastify';
 import ConfirmDelete from 'src/views/modals/ConfirmDelete/index';
+import * as dataTable from 'src/redux/actions/dataTable';
 
 const useStyles = makeStyles((theme) => ({
   root: {},
@@ -48,22 +49,31 @@ const Results = ({
   modulesList,
   setConfirmDeleteModal,
   confirmDeleteModal,
+  limit,
+  setLimit,
+  page,
+  setPage,
+  isSorting,
+  setIsSorting,
+  sortOrder,
+  setSortOrder,
+  searchInput,
+  setSearchInput,
+  isCheckAll,
+  setIsCheckAll,
+  selectedPerPage,
+  setSelectedPerPage,
+  deleteId,
+  setDeleteId,
+  selectedItems,
+  setSelectedItems,
+  disableHover,
+  setDisableHover,
   ...rest
 }) => {
   const classes = useStyles();
-  const [selectedItems, setSelectedItems] = useState([]);
-  const [isSorting, setIsSorting] = useState(false);
-  const [sortOrder, setSortOrder] = useState('asc');
-  const [searchInput, setSearchInput] = useState('');
-  const [limit, setLimit] = useState(10);
-  const [page, setPage] = useState(0);
-
   const [searchList, setSearchList] = useState([...moduleCategoryList]);
-  const [disableHover, setDisableHover] = useState(false);
-  const [isCheckAll, setIsCheckAll] = useState(false);
-  const [selectedPerPage, setSelectedPerPage] = useState([]);
   const [oldList, setOldList] = useState([]);
-  const [deleteId, setDeletId] = useState(0);
 
   const handleSelectAll = (event) => {
     let newSelectedCategoryIds;
@@ -76,10 +86,7 @@ const Results = ({
         })
         .filter((id) => id !== undefined);
 
-      setSelectedItems((selectedItems) => [
-        ...selectedItems,
-        ...newSelectedCategoryIds
-      ]);
+      setSelectedItems([...selectedItems, ...newSelectedCategoryIds]);
       setSelectedPerPage(newSelectedCategoryIds);
       checkAll(newSelectedCategoryIds);
     } else {
@@ -176,7 +183,7 @@ const Results = ({
     };
     if (deleteId) {
       deleteModuleCategory(deleteId, onSuccess);
-      setDeletId(0);
+      setDeleteId(0);
     } else deleteModuleCategory(selectedItems, onSuccess);
 
     setSelectedItems([]);
@@ -193,25 +200,24 @@ const Results = ({
   currentList = searchList
     .slice(page * limit, page * limit + limit)
     .map((module) => module.ids);
+
   useEffect(() => {
-    const dataCount = Object.keys(moduleCategoryList).length;
     for (let i = 0; i < currentList.length; i++) {
       if (selectedItems.includes(currentList[i])) setIsCheckAll(true);
       else setIsCheckAll(false);
     }
-    if (
-      searchInput == '' &&
-      !isSorting &&
-      JSON.stringify(moduleCategoryList) !== JSON.stringify(oldList)
-    ) {
-      setOldList(moduleCategoryList);
-      setSearchList(moduleCategoryList); // set page to 0 and set new limit when row per page is all
-      if (limit === searchList.length) {
-        setLimit(modulesList.length);
-        setPage(0);
-      }
+    if (!isSorting && searchInput == '') setSearchList(moduleCategoryList);
+    // set page to 0 and set new limit when row per page is all
+    if (limit === searchList.length) {
+      setLimit(moduleCategoryList.length);
+      setPage(0);
     }
-  });
+    if (JSON.stringify(moduleCategoryList) !== JSON.stringify(oldList)) {
+      setOldList(moduleCategoryList);
+      setSearchList(moduleCategoryList);
+    }
+  }, [moduleCategoryList, searchList, page, limit]);
+
   return (
     <>
       {confirmDeleteModal ? (
@@ -272,13 +278,13 @@ const Results = ({
                   </TableCell>
                   <TableCell
                     onClick={() => handleRequestSort('moduleCategoryName')}
-                    style={{ cursor: 'pointer' }}
+                    className="column-title"
                   >
                     <TableSortLabel>Category Name</TableSortLabel>
                   </TableCell>
                   <TableCell
                     onClick={() => handleRequestSort('moduleName')}
-                    style={{ cursor: 'pointer' }}
+                    className="column-title"
                   >
                     <TableSortLabel>Module Name</TableSortLabel>
                   </TableCell>
@@ -300,18 +306,14 @@ const Results = ({
                         CustomTableCell={CustomTableCell}
                         modulesList={modulesList}
                         setConfirmDeleteModal={setConfirmDeleteModal}
-                        setDeletId={setDeletId}
+                        setDeleteId={setDeleteId}
                       />
                     ))
                 ) : (
-                  <TableRow
-                    style={{
-                      width: '100%',
-                      textAlign: 'center',
-                      color: '#777'
-                    }}
-                  >
-                    <TableSortLabel>No Matching Result</TableSortLabel>
+                  <TableRow>
+                    <TableSortLabel className="no-match-text">
+                      No Matching Result
+                    </TableSortLabel>
                   </TableRow>
                 )}
               </TableBody>
@@ -344,14 +346,33 @@ Results.propTypes = {
 };
 
 const mapStateToProps = (state) => ({
-  // moduleCategoryList: state.moduleCategory.moduleCategoryList
+  limit: state.dataTable.limit,
+  page: state.dataTable.page,
+  isSorting: state.dataTable.isSorting,
+  sortOrder: state.dataTable.sortOrder,
+  searchInput: state.dataTable.searchInput,
+  isCheckAll: state.dataTable.isCheckAll,
+  selectedPerPage: state.dataTable.selectedPerPage,
+  deleteId: state.dataTable.deleteId,
+  selectedItems: state.dataTable.selectedItems,
+  disableHover: state.dataTable.disableHover
 });
 
 // mapping redux actions to component props
 const mapActionToProps = {
   fetchModuleCategory: actions.FetchAll,
   deleteModuleCategory: actions.Delete,
-  updateModuleCategory: actions.Update
+  updateModuleCategory: actions.Update,
+  setLimit: dataTable.setLimit,
+  setPage: dataTable.setPage,
+  setIsSorting: dataTable.setIsSorting,
+  setSortOrder: dataTable.setSortOrder,
+  setSearchInput: dataTable.setSearchInput,
+  setIsCheckAll: dataTable.setIsCheckAll,
+  setSelectedPerPage: dataTable.setSelectedPerPage,
+  setDeleteId: dataTable.setDeleteId,
+  setSelectedItems: dataTable.setSelectedItems,
+  setDisableHover: dataTable.setDisableHover
 };
 
 export default connect(mapStateToProps, mapActionToProps)(Results);

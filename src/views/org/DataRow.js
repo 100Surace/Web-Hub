@@ -41,7 +41,7 @@ const DataRow = ({
   rowData,
   selectedItems,
   handleSelectOne,
-  setDeletId,
+  setDeleteId,
   setConfirmDeleteModal,
   disableHover,
   setDisableHover,
@@ -97,7 +97,7 @@ const DataRow = ({
   };
   // Delete current data row
   const deleteThis = (id) => {
-    setDeletId(id);
+    setDeleteId(id);
     setConfirmDeleteModal(true);
   };
   return (
@@ -107,10 +107,10 @@ const DataRow = ({
       hover
       key={rowData.ids}
       selected={selectedItems.indexOf(rowData.ids) !== -1}
-      style={
-        selectedItems.indexOf(rowData.ids) !== -1
-          ? { background: 'rgba(255,0,0,0.1)' }
-          : {}
+      className={
+        'data-row ' + selectedItems.indexOf(rowData.ids) !== -1
+          ? 'selected'
+          : ''
       }
     >
       <TableCell padding="checkbox">
@@ -133,8 +133,14 @@ const DataRow = ({
         {disableHover ? (
           editId === rowData.ids ? (
             <ButtonGroup>
-              <CloseIcon onClick={() => onEditCancel(rowData.ids)} />
-              <SaveIcon onClick={() => saveEditing(rowData.ids)} />
+              <CloseIcon
+                className="btn-icon"
+                onClick={() => onEditCancel(rowData.ids)}
+              />
+              <SaveIcon
+                className="btn-icon"
+                onClick={() => saveEditing(rowData.ids)}
+              />
             </ButtonGroup>
           ) : (
             ''
@@ -142,9 +148,12 @@ const DataRow = ({
         ) : isHover ? (
           selectedItems.indexOf(rowData.ids) === -1 ? (
             <ButtonGroup>
-              <EditIcon onClick={() => onEdit(rowData.ids)} />
+              <EditIcon
+                className="btn-icon"
+                onClick={() => onEdit(rowData.ids)}
+              />
               <DeleteIcon
-                style={{ cursor: 'pointer' }}
+                className="btn-icon"
                 onClick={() => deleteThis(rowData.ids)}
               />
             </ButtonGroup>

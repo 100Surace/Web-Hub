@@ -31,6 +31,7 @@ import CloseIcon from '@material-ui/icons/Close';
 import { toast } from 'react-toastify';
 import { connect } from 'react-redux';
 import * as actions from 'src/redux/actions/organization/module';
+import * as dataTable from 'src/redux/actions/dataTable';
 import ConfirmDelete from 'src/views/modals/ConfirmDelete/index';
 
 const useStyles = makeStyles((theme) => ({
@@ -63,23 +64,32 @@ const Results = ({
   updateModule,
   setConfirmDeleteModal,
   confirmDeleteModal,
+  limit,
+  setLimit,
+  page,
+  setPage,
+  isSorting,
+  setIsSorting,
+  sortOrder,
+  setSortOrder,
+  searchInput,
+  setSearchInput,
+  isCheckAll,
+  setIsCheckAll,
+  selectedPerPage,
+  setSelectedPerPage,
+  deleteId,
+  setDeleteId,
+  selectedItems,
+  setSelectedItems,
+  disableHover,
+  setDisableHover,
   ...rest
 }) => {
   const classes = useStyles();
 
-  const [limit, setLimit] = useState(10);
-  const [page, setPage] = useState(0);
   const [oldList, setOldList] = useState([]);
-  // module data state
   const [searchList, setSearchList] = useState([...modulesList]);
-  const [selectedItems, setSelectedItems] = useState([]);
-  const [isSorting, setIsSorting] = useState(false);
-  const [sortOrder, setSortOrder] = useState('asc');
-  const [searchInput, setSearchInput] = useState('');
-  const [disableHover, setDisableHover] = useState(false);
-  const [isCheckAll, setIsCheckAll] = useState(false);
-  const [selectedPerPage, setSelectedPerPage] = useState([]);
-  const [deleteId, setDeletId] = useState(0);
 
   const handleSelectAll = (event) => {
     let newSelectedModuleIds;
@@ -88,10 +98,7 @@ const Results = ({
         .slice(page * limit, page * limit + limit)
         .map((module) => module.ids);
 
-      setSelectedItems((selectedItems) => [
-        ...selectedItems,
-        ...newSelectedModuleIds
-      ]);
+      setSelectedItems([...selectedItems, ...newSelectedModuleIds]);
       setSelectedPerPage(newSelectedModuleIds);
       checkAll(newSelectedModuleIds);
     } else {
@@ -196,7 +203,7 @@ const Results = ({
     };
     if (deleteId) {
       deleteModule(deleteId, onSuccess);
-      setDeletId(0);
+      setDeleteId(0);
     } else deleteModule(selectedItems, onSuccess);
 
     setSelectedItems([]);
@@ -219,20 +226,20 @@ const Results = ({
       if (selectedItems.includes(currentList[i])) setIsCheckAll(true);
       else setIsCheckAll(false);
     }
-    if (
-      JSON.stringify(modulesList) !== JSON.stringify(oldList) &&
-      searchInput == '' &&
-      !isSorting
-    ) {
+
+    if (!isSorting && searchInput == '') setSearchList(modulesList);
+    // set page to 0 and set new limit when row per page is all
+    if (limit === searchList.length) {
+      setLimit(modulesList.length);
+      setPage(0);
+    }
+    if (JSON.stringify(modulesList) !== JSON.stringify(oldList)) {
       setOldList(modulesList);
       setSearchList(modulesList);
-      // set page to 0 and set new limit when row per page is all
-      if (limit === searchList.length) {
-        setLimit(modulesList.length);
-        setPage(0);
-      }
+      console.log(isSorting);
     }
-  });
+  }, [modulesList, searchList, page, limit]); // array of state
+
   return (
     <>
       {confirmDeleteModal ? (
@@ -297,7 +304,7 @@ const Results = ({
                       key={headCell.id}
                       align={headCell.numeric ? 'right' : 'left'}
                       padding={headCell.disablePadding ? 'none' : 'default'}
-                      style={{ cursor: 'pointer' }}
+                      className="column-title"
                       onClick={handleRequestSort}
                     >
                       <TableSortLabel>{headCell.label}</TableSortLabel>
@@ -320,17 +327,11 @@ const Results = ({
                         disableHover={disableHover}
                         setDisableHover={setDisableHover}
                         setConfirmDeleteModal={setConfirmDeleteModal}
-                        setDeletId={setDeletId}
+                        setDeleteId={setDeleteId}
                       />
                     ))
                 ) : (
-                  <TableRow
-                    style={{
-                      width: '100%',
-                      textAlign: 'center',
-                      color: '#777'
-                    }}
-                  >
+                  <TableRow className="no-match-text">
                     <TableSortLabel>No Matching Result</TableSortLabel>
                   </TableRow>
                 )}
@@ -358,16 +359,36 @@ const Results = ({
   );
 };
 
-const mapStateToProps = (state) => ({});
+const mapStateToProps = (state) => ({
+  limit: state.dataTable.limit,
+  page: state.dataTable.page,
+  isSorting: state.dataTable.isSorting,
+  sortOrder: state.dataTable.sortOrder,
+  searchInput: state.dataTable.searchInput,
+  isCheckAll: state.dataTable.isCheckAll,
+  selectedPerPage: state.dataTable.selectedPerPage,
+  deleteId: state.dataTable.deleteId,
+  selectedItems: state.dataTable.selectedItems,
+  disableHover: state.dataTable.disableHover
+});
 
 const mapActionToProps = {
   deleteModule: actions.Delete,
-  updateModule: actions.update
+  updateModule: actions.update,
+  setLimit: dataTable.setLimit,
+  setPage: dataTable.setPage,
+  setIsSorting: dataTable.setIsSorting,
+  setSortOrder: dataTable.setSortOrder,
+  setSearchInput: dataTable.setSearchInput,
+  setIsCheckAll: dataTable.setIsCheckAll,
+  setSelectedPerPage: dataTable.setSelectedPerPage,
+  setDeleteId: dataTable.setDeleteId,
+  setSelectedItems: dataTable.setSelectedItems,
+  setDisableHover: dataTable.setDisableHover
 };
 
 export default connect(mapStateToProps, mapActionToProps)(Results);
 
-//
 const DataRow = ({
   updateModule,
   module,
@@ -376,7 +397,7 @@ const DataRow = ({
   disableHover,
   setDisableHover,
   setConfirmDeleteModal,
-  setDeletId
+  setDeleteId
 }) => {
   const [input, setInput] = useState(module.moduleName);
   const [editing, setEditing] = useState(false);
@@ -416,7 +437,7 @@ const DataRow = ({
   };
 
   const deleteThis = (id) => {
-    setDeletId(id);
+    setDeleteId(id);
     setConfirmDeleteModal(true);
   };
   return (
@@ -426,10 +447,8 @@ const DataRow = ({
       hover
       key={module.ids}
       selected={selectedItems.indexOf(module.ids) !== -1}
-      style={
-        selectedItems.indexOf(module.ids) !== -1
-          ? { background: 'rgba(255,0,0,0.1)' }
-          : {}
+      className={
+        'data-row ' + selectedItems.indexOf(module.ids) !== -1 ? 'selected' : ''
       }
     >
       <TableCell padding="checkbox">
@@ -450,8 +469,14 @@ const DataRow = ({
         {disableHover ? (
           editId === module.ids ? (
             <ButtonGroup>
-              <CloseIcon onClick={() => onEditCancel(module.ids)} />
-              <SaveIcon onClick={() => saveEditing(module.ids)} />
+              <CloseIcon
+                className="btn-icon"
+                onClick={() => onEditCancel(module.ids)}
+              />
+              <SaveIcon
+                className="btn-icon"
+                onClick={() => saveEditing(module.ids)}
+              />
             </ButtonGroup>
           ) : (
             ''
@@ -459,9 +484,12 @@ const DataRow = ({
         ) : isHover ? (
           selectedItems.indexOf(module.ids) === -1 ? (
             <ButtonGroup>
-              <EditIcon onClick={() => onEdit(module.ids)} />
+              <EditIcon
+                className="btn-icon"
+                onClick={() => onEdit(module.ids)}
+              />
               <DeleteIcon
-                style={{ cursor: 'pointer' }}
+                className="btn-icon"
                 onClick={() => deleteThis(module.ids)}
               />
             </ButtonGroup>
@@ -475,6 +503,18 @@ const DataRow = ({
     </TableRow>
   );
 };
+const mapStateToProps_datarow = (state) => ({
+  editing: state.dataTable.editing,
+  isHover: state.dataTable.isHover,
+  editId: state.dataTable.editId
+});
+const mapActionsToProps_datarow = {
+  setEditing: dataTable.setEditing,
+  setIsHover: dataTable.setIsHover,
+  setEditId: dataTable.setEditId
+};
+connect(mapStateToProps_datarow, mapActionsToProps_datarow)(DataRow);
+
 DataRow.propTypes = {
   module: PropTypes.object
 };

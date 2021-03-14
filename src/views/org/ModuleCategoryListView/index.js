@@ -6,6 +6,8 @@ import Toolbar from './Toolbar';
 import { connect } from 'react-redux';
 import * as actions from 'src/redux/actions/organization/moduleCategory';
 import { fetchAll } from 'src/redux/actions/organization/module';
+import { resetState } from 'src/redux/actions/dataTable';
+import './styles.css';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -20,7 +22,8 @@ const ModuleCategoryListView = ({
   fetchModuleCategory,
   fetchModules,
   modulesList,
-  moduleCategoryList
+  moduleCategoryList,
+  resetState
 }) => {
   const classes = useStyles();
   const [confirmDeleteModal, setConfirmDeleteModal] = useState(false);
@@ -28,6 +31,7 @@ const ModuleCategoryListView = ({
   useEffect(() => {
     fetchModuleCategory();
     fetchModules();
+    resetState();
   }, []);
 
   return (
@@ -56,7 +60,8 @@ const mapStateToProps = (state) => ({
 // mapping redux actions to component props
 const mapActionToProps = {
   fetchModuleCategory: actions.FetchAll,
-  fetchModules: fetchAll
+  fetchModules: fetchAll,
+  resetState: resetState
 };
 
 export default connect(

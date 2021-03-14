@@ -1,6 +1,8 @@
 body {
   font-family: Verdana, Geneva, Tahoma, sans-serif;
 }
+
+/* form styles */
 .formgroup {
   margin-right: 10px;
   min-width: 200px;
@@ -10,4 +12,23 @@ body {
 .formgroup .form-error {
   color: red;
   font-size: 0.8em;
+}
+
+/* Data table styles */
+.column-title {
+  cursor: pointer;
+}
+.no-match-text {
+  color: #aaa !important;
+}
+.btn-icon {
+  cursor: pointer;
+}
+.MuiTableRow-root.Mui-selected {
+  background-color: rgba(255, 0, 0, 0.1) !important;
+}
+.table-toolbar {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
 }

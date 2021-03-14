@@ -29,7 +29,10 @@ const Toolbar = ({ className, modulesList, addModuleCategory, ...rest }) => {
     moduleCategoryName: '',
     moduleName: ''
   });
-  const [error, setError] = useState('');
+  const [error, setError] = useState({
+    module: '',
+    moduleCategory: ''
+  });
 
   const handleInputeChange = (e) => {
     const value = e.target.value;
