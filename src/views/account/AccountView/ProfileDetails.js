@@ -35,12 +35,9 @@ const useStyles = makeStyles(() => ({
 const ProfileDetails = ({ className, ...rest }) => {
   const classes = useStyles();
   const [values, setValues] = useState({
-    firstName: 'Katarina',
-    lastName: 'Smith',
-    email: 'demo@devias.io',
-    phone: '',
-    state: 'Alabama',
-    country: 'USA'
+    firstName: 'Education',
+    email: 'sewahub@outlook.com',
+    phone: '0211049286',
   });
 
   const handleChange = (event) => {
@@ -59,7 +56,7 @@ const ProfileDetails = ({ className, ...rest }) => {
     >
       <Card>
         <CardHeader
-          subheader="The information can be edited"
+          subheader="Your Organization"
           title="Profile"
         />
         <Divider />
@@ -75,84 +72,8 @@ const ProfileDetails = ({ className, ...rest }) => {
             >
               <TextField
                 fullWidth
-                helperText="Please specify the first name"
-                label="First name"
-                name="firstName"
-                onChange={handleChange}
-                required
-                value={values.firstName}
-                variant="outlined"
-              />
-            </Grid>
-            <Grid
-              item
-              md={6}
-              xs={12}
-            >
-              <TextField
-                fullWidth
-                label="Last name"
-                name="lastName"
-                onChange={handleChange}
-                required
-                value={values.lastName}
-                variant="outlined"
-              />
-            </Grid>
-            <Grid
-              item
-              md={6}
-              xs={12}
-            >
-              <TextField
-                fullWidth
-                label="Email Address"
-                name="email"
-                onChange={handleChange}
-                required
-                value={values.email}
-                variant="outlined"
-              />
-            </Grid>
-            <Grid
-              item
-              md={6}
-              xs={12}
-            >
-              <TextField
-                fullWidth
-                label="Phone Number"
-                name="phone"
-                onChange={handleChange}
-                type="number"
-                value={values.phone}
-                variant="outlined"
-              />
-            </Grid>
-            <Grid
-              item
-              md={6}
-              xs={12}
-            >
-              <TextField
-                fullWidth
-                label="Country"
-                name="country"
-                onChange={handleChange}
-                required
-                value={values.country}
-                variant="outlined"
-              />
-            </Grid>
-            <Grid
-              item
-              md={6}
-              xs={12}
-            >
-              <TextField
-                fullWidth
-                label="Select State"
-                name="state"
+                label="Select Module"
+                name="module"
                 onChange={handleChange}
                 required
                 select
@@ -169,6 +90,187 @@ const ProfileDetails = ({ className, ...rest }) => {
                   </option>
                 ))}
               </TextField>
+            </Grid>
+            <Grid
+              item
+              md={6}
+              xs={12}
+            >
+              <TextField
+                fullWidth
+                label="Select Module Category"
+                name="moduleCategory"
+                onChange={handleChange}
+                required
+                select
+                SelectProps={{ native: true }}
+                value={values.state}
+                variant="outlined"
+              >
+                {states.map((option) => (
+                  <option
+                    key={option.value}
+                    value={option.value}
+                  >
+                    {option.label}
+                  </option>
+                ))}
+              </TextField>
+            </Grid>
+            <Grid
+              item
+              md={6}
+              xs={12}
+            >
+              <TextField
+                fullWidth
+                label="Select Service Type"
+                name="serviceType"
+                onChange={handleChange}
+                required
+                select
+                SelectProps={{ native: true }}
+                value={values.state}
+                variant="outlined"
+              >
+                {states.map((option) => (
+                  <option
+                    key={option.value}
+                    value={option.value}
+                  >
+                    {option.label}
+                  </option>
+                ))}
+              </TextField>
+            </Grid>
+            <Grid
+              item
+              md={6}
+              xs={12}
+            >
+              <TextField
+                fullWidth
+                label="Select Organization Type"
+                name="organizationType"
+                onChange={handleChange}
+                required
+                select
+                SelectProps={{ native: true }}
+                value={values.state}
+                variant="outlined"
+              >
+                {states.map((option) => (
+                  <option
+                    key={option.value}
+                    value={option.value}
+                  >
+                    {option.label}
+                  </option>
+                ))}
+              </TextField>
+            </Grid>
+            <Grid
+              item
+              md={6}
+              xs={12}
+            >
+              <TextField
+                fullWidth
+                label="Organization Name"
+                name="organizationName"
+                onChange={handleChange}
+                required
+                value={values.firstName}
+                variant="outlined"
+              />
+            </Grid>
+            <Grid
+              item
+              md={6}
+              xs={12}
+            >
+              <TextField
+                fullWidth
+                label="Secondary Email Address"
+                name="secondaryEmail"
+                onChange={handleChange}
+                required
+                value={values.email}
+                variant="outlined"
+              />
+            </Grid>
+            <Grid
+              item
+              md={6}
+              xs={12}
+            >
+              <TextField
+                fullWidth
+                label="Secondary Phone Number"
+                name="secondaryPhone"
+                onChange={handleChange}
+                type="number"
+                value={values.phone}
+                variant="outlined"
+              />
+            </Grid>
+            <Grid
+              item
+              md={6}
+              xs={12}
+            >
+              <TextField
+                fullWidth
+                label="Organization Status"
+                name="organizationStatus"
+                onChange={handleChange}
+                required
+                select
+                SelectProps={{ native: true }}
+                value={values.state}
+                variant="outlined"
+              >
+                {states.map((option) => (
+                  <option
+                    key={option.value}
+                    value={option.value}
+                  >
+                    {option.label}
+                  </option>
+                ))}
+              </TextField>
+            </Grid>
+            <Grid
+              item
+              md={12}
+              xs={12}
+            >
+              <TextField
+                fullWidth
+                multiline
+                label="Short Description"
+                name="shortDescription"
+                onChange={handleChange}
+                required
+                value={values.country}
+                variant="outlined"
+              />
+            </Grid>
+            <Grid
+              item
+              md={12}
+              xs={12}
+            >
+              <TextField
+                fullWidth
+                multiline
+                label="Long Description"
+                name="longDescription"
+                onChange={handleChange}
+                required
+                value={values.country}
+                variant="outlined"
+              />
             </Grid>
           </Grid>
         </CardContent>
