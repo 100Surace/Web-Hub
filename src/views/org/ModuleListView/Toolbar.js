@@ -94,7 +94,10 @@ Toolbar.propTypes = {
   modules: PropTypes.array,
   onInputChange: PropTypes.func,
   form: PropTypes.object,
-  create: PropTypes.func
+  create: PropTypes.func,
+  currentId: PropTypes.number,
+  update: PropTypes.func,
+  setSelectedItem: PropTypes.func
 };
 
 const mapStateToProps = (state) => ({

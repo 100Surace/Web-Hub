@@ -1,41 +1,12 @@
-import React, { useState, useEffect } from 'react';
-import clsx from 'clsx';
-import {
-  Checkbox,
-  TableCell,
-  TableRow,
-  makeStyles,
-  ButtonGroup
-} from '@material-ui/core';
+import React, { useState } from 'react';
+import { Checkbox, TableCell, TableRow, ButtonGroup } from '@material-ui/core';
 import DeleteIcon from '@material-ui/icons/Delete';
 import EditIcon from '@material-ui/icons/Edit';
 import SaveIcon from '@material-ui/icons/Save';
 import CloseIcon from '@material-ui/icons/Close';
 import PropTypes from 'prop-types';
-import { toast } from 'react-toastify';
 
-const useStyles = makeStyles((theme) => ({
-  root: {
-    width: '100%',
-    marginTop: theme.spacing(3),
-    overflowX: 'auto'
-  },
-  table: {
-    minWidth: 650
-  },
-  selectTableCell: {
-    width: 60
-  },
-  tableCell: {
-    width: 130,
-    height: 40
-  },
-  input: {
-    width: 130,
-    height: 40
-  }
-}));
-// Getting props from Parent
+// Destructuring props from Parent
 const DataRow = ({
   updateData,
   rowData,
@@ -48,8 +19,6 @@ const DataRow = ({
   CustomTableCell,
   modulesList
 }) => {
-  const classes = useStyles();
-
   const [editing, setEditing] = useState(false);
   const [isHover, setIsHover] = useState(false);
   const [editId, setEditId] = useState(0);
@@ -71,15 +40,12 @@ const DataRow = ({
     setEditId(0);
   };
   // typing state
-  const onInputChange = (e) => {
-    const value = e.target.value;
-    setFormValue({ ...formValue, [e.target.name]: value });
+  const onInputChange = ({ target: { value, name } }) => {
+    setFormValue({ ...formValue, [name]: value });
   };
   const saveEditing = (id) => {
     // gets slected moduleName from id
-    const module = modulesList.filter(
-      (module) => module.ids === formValue.moduleId
-    )[0];
+    const module = modulesList.filter((m) => m.ids === formValue.moduleId)[0];
     updateData(id, { ...formValue, moduleName: module.moduleName });
     setEditing(!editing);
     setDisableHover(false);
@@ -88,11 +54,11 @@ const DataRow = ({
     setFormValue({ ...formValue, moduleName: module.moduleName });
   };
 
-  const onMouseEnterHandler = (e) => {
+  const onMouseEnterHandler = () => {
     setIsHover(true);
   };
 
-  const onMouseLeaveHandler = (e) => {
+  const onMouseLeaveHandler = () => {
     setIsHover(false);
   };
   // Delete current data row
@@ -100,6 +66,33 @@ const DataRow = ({
     setDeleteId(id);
     setConfirmDeleteModal(true);
   };
+
+  const renderActionButtons = (row) => {
+    let actionBtns;
+    if (disableHover && editId === row.ids) {
+      actionBtns = (
+        <ButtonGroup>
+          <CloseIcon
+            className="btn-icon"
+            onClick={() => onEditCancel(row.ids)}
+          />
+          <SaveIcon className="btn-icon" onClick={() => saveEditing(row.ids)} />
+        </ButtonGroup>
+      );
+    } else if (isHover && selectedItems.indexOf(row.ids) === -1) {
+      actionBtns = (
+        <ButtonGroup>
+          <EditIcon className="btn-icon" onClick={() => onEdit(row.ids)} />
+          <DeleteIcon
+            className="btn-icon"
+            onClick={() => deleteThis(row.ids)}
+          />
+        </ButtonGroup>
+      );
+    }
+    return actionBtns;
+  };
+
   return (
     <TableRow
       onMouseEnter={onMouseEnterHandler}
@@ -107,15 +100,10 @@ const DataRow = ({
       hover
       key={rowData.ids}
       selected={selectedItems.indexOf(rowData.ids) !== -1}
-      className={
-        'data-row ' + selectedItems.indexOf(rowData.ids) !== -1
-          ? 'selected'
-          : ''
-      }
     >
       <TableCell padding="checkbox">
         <Checkbox
-          checked={selectedItems.indexOf(rowData.ids) !== -1 ? true : false}
+          checked={selectedItems.indexOf(rowData.ids) !== -1}
           onChange={() => handleSelectOne(rowData.ids)}
           value="true"
         />
@@ -129,47 +117,22 @@ const DataRow = ({
         onInputChange={onInputChange}
         modulesList={modulesList}
       />
-      <TableCell align="right">
-        {disableHover ? (
-          editId === rowData.ids ? (
-            <ButtonGroup>
-              <CloseIcon
-                className="btn-icon"
-                onClick={() => onEditCancel(rowData.ids)}
-              />
-              <SaveIcon
-                className="btn-icon"
-                onClick={() => saveEditing(rowData.ids)}
-              />
-            </ButtonGroup>
-          ) : (
-            ''
-          )
-        ) : isHover ? (
-          selectedItems.indexOf(rowData.ids) === -1 ? (
-            <ButtonGroup>
-              <EditIcon
-                className="btn-icon"
-                onClick={() => onEdit(rowData.ids)}
-              />
-              <DeleteIcon
-                className="btn-icon"
-                onClick={() => deleteThis(rowData.ids)}
-              />
-            </ButtonGroup>
-          ) : (
-            ''
-          )
-        ) : (
-          ''
-        )}
-      </TableCell>
+      <TableCell align="right">{renderActionButtons(rowData)}</TableCell>
     </TableRow>
   );
 };
 
 DataRow.propTypes = {
-  data: PropTypes.object
+  updateData: PropTypes.func,
+  rowData: PropTypes.object,
+  selectedItems: PropTypes.array,
+  handleSelectOne: PropTypes.func,
+  setDeleteId: PropTypes.func,
+  setConfirmDeleteModal: PropTypes.func,
+  disableHover: PropTypes.bool,
+  setDisableHover: PropTypes.func,
+  CustomTableCell: PropTypes.any,
+  modulesList: PropTypes.array
 };
 
 export default DataRow;

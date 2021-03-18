@@ -7,8 +7,8 @@ import 'src/mixins/chartjs';
 import theme from 'src/theme';
 import routes from 'src/routes';
 import { Provider } from 'react-redux';
-import store from './redux/actions/store';
 import { ToastContainer } from 'react-toastify';
+import store from './redux/actions/store';
 import 'src/views/styles/app.css';
 
 const App = () => {

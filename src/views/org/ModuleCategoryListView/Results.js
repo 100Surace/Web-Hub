@@ -12,26 +12,24 @@ import {
   TableHead,
   TablePagination,
   TableRow,
-  Typography,
   Button,
   TableSortLabel,
   TextField,
   InputAdornment,
   SvgIcon,
-  makeStyles,
-  Input,
-  Select,
-  MenuItem
+  makeStyles
 } from '@material-ui/core';
-import TableToolbar from '../TableToolbar';
 import { Search as SearchIcon } from 'react-feather';
-import DataRow from '../DataRow';
 import { connect } from 'react-redux';
 import * as actions from 'src/redux/actions/organization/moduleCategory';
 import ButtonGroup from '@material-ui/core/ButtonGroup';
 import { toast } from 'react-toastify';
 import ConfirmDelete from 'src/views/modals/ConfirmDelete/index';
 import * as dataTable from 'src/redux/actions/dataTable';
+import { sortDesc, sortAsc } from 'src/utils/dataTableHelper';
+import DataRow from '../DataRow';
+import TableToolbar from '../TableToolbar';
+import CustomTableCell from './CustomTableCell';
 
 const useStyles = makeStyles((theme) => ({
   root: {},
@@ -75,16 +73,24 @@ const Results = ({
   const [searchList, setSearchList] = useState([...moduleCategoryList]);
   const [oldList, setOldList] = useState([]);
 
+  let currentList = [];
+  const checkAll = (selected) => {
+    currentList = searchList
+      .slice(page * limit, page * limit + limit)
+      .map((module) => module.ids);
+    for (let i = 0; i < currentList.length; i++) {
+      if (selected.includes(currentList[i])) setIsCheckAll(true);
+    }
+  };
+
   const handleSelectAll = (event) => {
     let newSelectedCategoryIds;
     if (event.target.checked) {
       // gets ids that are not checked
       newSelectedCategoryIds = searchList
         .slice(page * limit, page * limit + limit)
-        .map((category) => {
-          if (!selectedItems.includes(category.ids)) return category.ids;
-        })
-        .filter((id) => id !== undefined);
+        .filter((category) => !selectedItems.includes(category.ids))
+        .map((category) => category.ids);
 
       setSelectedItems([...selectedItems, ...newSelectedCategoryIds]);
       setSelectedPerPage(newSelectedCategoryIds);
@@ -99,16 +105,6 @@ const Results = ({
       setSelectedItems(newItems);
       setSelectedPerPage([]);
       setIsCheckAll(false);
-    }
-  };
-
-  let currentList = [];
-  const checkAll = (selected) => {
-    currentList = searchList
-      .slice(page * limit, page * limit + limit)
-      .map((module) => module.ids);
-    for (let i = 0; i < currentList.length; i++) {
-      if (selected.includes(currentList[i])) setIsCheckAll(true);
     }
   };
 
@@ -131,8 +127,7 @@ const Results = ({
     setSelectedPerPage(curIds);
   };
 
-  const onSearching = (e) => {
-    const value = e.target.value;
+  const onSearching = ({ target: { value } }) => {
     setSearchInput(value);
     const result = moduleCategoryList.filter((category) =>
       category.moduleCategoryName.toLowerCase().includes(value.toLowerCase())
@@ -153,21 +148,9 @@ const Results = ({
     let result = [];
     setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
     if (sortOrder === 'desc') {
-      result = searchList.sort((a, b) =>
-        a[column].toLowerCase() > b[column].toLowerCase()
-          ? 1
-          : b[column].toLowerCase() > a[column].toLowerCase()
-          ? -1
-          : 0
-      );
+      result = searchList.sort((a, b) => sortDesc(column, a, b));
     } else {
-      result = searchList.sort((a, b) =>
-        a[column].toLowerCase() < b[column].toLowerCase()
-          ? 1
-          : b[column].toLowerCase() < a[column].toLowerCase()
-          ? -1
-          : 0
-      );
+      result = searchList.sort((a, b) => sortAsc(column, a, b));
     }
     setSearchList(result);
     setIsSorting(true);
@@ -195,6 +178,7 @@ const Results = ({
 
   const clearSelection = () => {
     setSelectedItems([]);
+    setIsCheckAll(false);
   };
 
   currentList = searchList
@@ -206,7 +190,7 @@ const Results = ({
       if (selectedItems.includes(currentList[i])) setIsCheckAll(true);
       else setIsCheckAll(false);
     }
-    if (!isSorting && searchInput == '') setSearchList(moduleCategoryList);
+    if (!isSorting && searchInput === '') setSearchList(moduleCategoryList);
     // set page to 0 and set new limit when row per page is all
     if (limit === searchList.length) {
       setLimit(moduleCategoryList.length);
@@ -342,7 +326,33 @@ const Results = ({
 
 Results.propTypes = {
   className: PropTypes.string,
-  moduleCategoryList: PropTypes.array.isRequired
+  moduleCategoryList: PropTypes.array,
+  fetchModuleCategory: PropTypes.func,
+  deleteModuleCategory: PropTypes.func,
+  updateModuleCategory: PropTypes.func,
+  modulesList: PropTypes.array,
+  setConfirmDeleteModal: PropTypes.func,
+  confirmDeleteModal: PropTypes.func,
+  limit: PropTypes.number,
+  setLimit: PropTypes.func,
+  page: PropTypes.number,
+  setPage: PropTypes.func,
+  isSorting: PropTypes.bool,
+  setIsSorting: PropTypes.func,
+  sortOrder: PropTypes.string,
+  setSortOrder: PropTypes.func,
+  searchInput: PropTypes.string,
+  setSearchInput: PropTypes.func,
+  isCheckAll: PropTypes.bool,
+  setIsCheckAll: PropTypes.func,
+  selectedPerPage: PropTypes.array,
+  setSelectedPerPage: PropTypes.func,
+  deleteId: PropTypes.number,
+  setDeleteId: PropTypes.func,
+  selectedItems: PropTypes.array,
+  setSelectedItems: PropTypes.func,
+  disableHover: PropTypes.bool,
+  setDisableHover: PropTypes.func
 };
 
 const mapStateToProps = (state) => ({
@@ -376,83 +386,3 @@ const mapActionToProps = {
 };
 
 export default connect(mapStateToProps, mapActionToProps)(Results);
-
-//
-const CustomTableCell = ({
-  formValue,
-  setFormValue,
-  setOriginalFormVal,
-  rowData,
-  isEditMode,
-  onInputChange,
-  modulesList
-}) => {
-  const classes = useStyles();
-
-  // re-render if rowData is changed
-  useEffect(() => {
-    const data = {
-      moduleCategoryName: rowData.moduleCategoryName,
-      moduleId: rowData.moduleId,
-      moduleName: rowData.moduleName
-    };
-    // sets formValue if it is empty
-    setFormValue({ ...data });
-
-    // save original data
-    setOriginalFormVal({ ...data });
-  }, [rowData.moduleCategoryList, rowData.moduleName, rowData.moduleId]);
-  return (
-    <>
-      {isEditMode ? (
-        <>
-          <TableCell>
-            <section align="left" className={classes.tableCell}>
-              <Input
-                value={formValue.moduleCategoryName}
-                name="moduleCategoryName"
-                onChange={(e) => onInputChange(e)}
-                className={classes.input}
-              />
-            </section>
-          </TableCell>
-          <TableCell>
-            <section align="left" className={classes.tableCell}>
-              <Select
-                labelId="SelectModule"
-                id="SelectModule"
-                value={formValue.moduleId}
-                onChange={(e) => onInputChange(e)}
-                label="Select Module"
-                name="moduleId"
-              >
-                {modulesList.map(({ ids, moduleName }) => (
-                  <MenuItem key={ids} value={ids}>
-                    {moduleName}
-                  </MenuItem>
-                ))}
-              </Select>
-            </section>
-          </TableCell>
-        </>
-      ) : (
-        <>
-          <TableCell>
-            <Typography>
-              {formValue.hasOwnProperty('moduleCategoryName')
-                ? formValue.moduleCategoryName
-                : rowData.moduleCategoryName}
-            </Typography>
-          </TableCell>
-          <TableCell>
-            <Typography>
-              {formValue.hasOwnProperty('moduleName')
-                ? formValue.moduleName
-                : rowData.moduleName}
-            </Typography>
-          </TableCell>
-        </>
-      )}
-    </>
-  );
-};

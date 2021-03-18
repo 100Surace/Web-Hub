@@ -32,3 +32,8 @@ body {
   display: flex;
   justify-content: space-between;
 }
+.table-toolbar > div:last-child{
+  flex:1;
+  display: flex;
+  justify-content: flex-end;
+}

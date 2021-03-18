@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types';
 import WarningIcon from '@material-ui/icons/WarningRounded';
 import './styles.css';
 
@@ -13,17 +14,23 @@ const ConfirmDelete = ({ confirmDelete, setConfirmDeleteModal }) => (
       </div>
       <section>
         <button
+          type="button"
           onClick={() => setConfirmDeleteModal(false)}
           className="btn-cancel"
         >
           Cancel
         </button>
-        <button onClick={confirmDelete} className="btn-delete">
+        <button type="button" onClick={confirmDelete} className="btn-delete">
           Delete
         </button>
       </section>
     </div>
   </div>
 );
+
+ConfirmDelete.propTypes = {
+  confirmDelete: PropTypes.func,
+  setConfirmDeleteModal: PropTypes.func
+};
 
 export default ConfirmDelete;

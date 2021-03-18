@@ -17,14 +17,14 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-const ModuleListView = ({ fetchModules, modulesList, resetState }) => {
+const ModuleListView = ({ fetchModules, modulesList, resetDataTableState }) => {
   const classes = useStyles();
 
   const [confirmDeleteModal, setConfirmDeleteModal] = useState(false);
 
   useEffect(() => {
     fetchModules();
-    resetState();
+    resetDataTableState();
   }, []);
 
   // useEffect(() => {
@@ -48,10 +48,9 @@ const ModuleListView = ({ fetchModules, modulesList, resetState }) => {
 };
 
 ModuleListView.propTypes = {
-  fetch: PropTypes.func,
-  modules: PropTypes.array,
-  onInputChange: PropTypes.func,
-  deleteModules: PropTypes.func
+  fetchModules: PropTypes.func,
+  modulesList: PropTypes.array,
+  resetDataTableState: PropTypes.func
 };
 
 const mapStateToProps = (state) => ({
@@ -60,7 +59,7 @@ const mapStateToProps = (state) => ({
 
 const mapActionToProps = {
   fetchModules: actions.fetchAll,
-  resetState: resetState
+  resetDataTableState: resetState
 };
 
 export default connect(mapStateToProps, mapActionToProps)(ModuleListView);

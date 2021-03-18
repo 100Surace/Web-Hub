@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import PropTypes from 'prop-types';
 import clsx from 'clsx';
 import {
@@ -8,7 +8,6 @@ import {
   CardContent,
   TextField,
   InputAdornment,
-  makeStyles,
   FormControl,
   InputLabel,
   Select,
@@ -18,12 +17,7 @@ import { connect } from 'react-redux';
 import * as actions from 'src/redux/actions/organization/moduleCategory';
 import { toast } from 'react-toastify';
 
-const useStyles = makeStyles((theme) => ({
-  root: {}
-}));
-
 const Toolbar = ({ className, modulesList, addModuleCategory, ...rest }) => {
-  const classes = useStyles();
   const [formState, setFormState] = useState({
     moduleId: '',
     moduleCategoryName: '',
@@ -34,13 +28,10 @@ const Toolbar = ({ className, modulesList, addModuleCategory, ...rest }) => {
     moduleCategory: ''
   });
 
-  const handleInputeChange = (e) => {
-    const value = e.target.value;
-    const name = e.target.name;
-
+  const handleInputeChange = ({ target: { name, value } }) => {
     if (name === 'moduleId') {
       // gets moduleName of selected id
-      const module = modulesList.filter((module) => module.ids === value)[0];
+      const module = modulesList.filter((m) => m.ids === value)[0];
 
       setFormState({
         ...formState,
@@ -51,8 +42,7 @@ const Toolbar = ({ className, modulesList, addModuleCategory, ...rest }) => {
       setFormState({ ...formState, moduleCategoryName: value });
     }
   };
-  const validateInput = (e) => {
-    const name = e.target.name;
+  const validateInput = ({ target: { name } }) => {
     if (name === 'moduleCategoryName') {
       if (formState.moduleCategoryName.length < 2) {
         setError({
@@ -62,10 +52,10 @@ const Toolbar = ({ className, modulesList, addModuleCategory, ...rest }) => {
       } else {
         setError({ ...error, moduleCategory: '' });
       }
+    } else if (!formState.moduleId) {
+      setError({ ...error, module: 'Module is required' });
     } else {
-      if (!formState.moduleId)
-        setError({ ...error, module: 'Module is required' });
-      else setError({ ...error, module: '' });
+      setError({ ...error, module: '' });
     }
   };
   const handleSubmit = (e) => {
@@ -74,7 +64,7 @@ const Toolbar = ({ className, modulesList, addModuleCategory, ...rest }) => {
       const onSuccess = () => {
         toast.success('Added successfully');
       };
-      if (formState.moduleId != '' && formState.moduleCategoryName != '') {
+      if (formState.moduleId !== '' && formState.moduleCategoryName !== '') {
         addModuleCategory(formState, onSuccess);
       }
       setFormState({ ...formState, moduleId: '', moduleCategoryName: '' });
@@ -88,18 +78,13 @@ const Toolbar = ({ className, modulesList, addModuleCategory, ...rest }) => {
   };
 
   return (
-    <div className={clsx(classes.root, className)} {...rest}>
+    <div className={clsx(className)} {...rest}>
       <Box mt={1}>
         <Card>
           <CardContent>
             <Box maxWidth={800} display="flex">
               <div className="formgroup">
-                <FormControl
-                  variant="outlined"
-                  className={classes.formControl}
-                  fullWidth
-                  required
-                >
+                <FormControl variant="outlined" fullWidth required>
                   <InputLabel id="demo-simple-select-outlined-label">
                     Select Module
                   </InputLabel>
@@ -164,10 +149,12 @@ const Toolbar = ({ className, modulesList, addModuleCategory, ...rest }) => {
 };
 
 Toolbar.propTypes = {
-  className: PropTypes.string
+  className: PropTypes.string,
+  modulesList: PropTypes.object,
+  addModuleCategory: PropTypes.func
 };
 
-const mapStateToProps = (state) => ({});
+const mapStateToProps = () => ({});
 
 const mapActionToProps = {
   addModuleCategory: actions.Create

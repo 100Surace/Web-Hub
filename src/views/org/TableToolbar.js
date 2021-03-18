@@ -1,4 +1,5 @@
 import clsx from 'clsx';
+import PropTypes from 'prop-types';
 import {
   Typography,
   Toolbar,
@@ -16,16 +17,10 @@ const useToolbarStyles = makeStyles((theme) => ({
     paddingLeft: theme.spacing(2),
     paddingRight: theme.spacing(1)
   },
-  highlight:
-    theme.palette.type === 'light'
-      ? {
-          color: 'red',
-          backgroundColor: 'rgba(255,0,0,0.1)'
-        }
-      : {
-          color: 'red',
-          backgroundColor: 'rgba(255,0,0,0.1)'
-        },
+  highlight: {
+    color: 'red',
+    backgroundColor: 'rgba(255,0,0,0.1)'
+  },
   title: {
     flex: '1 1 100%'
   }
@@ -52,9 +47,9 @@ const TableToolbar = ({
             color="inherit"
             variant="subtitle1"
             component="div"
-            className=""
           >
-            {numSelected} selected
+            {numSelected}
+            selected
           </Typography>
         ) : (
           <Typography
@@ -94,4 +89,12 @@ const TableToolbar = ({
     </Toolbar>
   );
 };
+
+TableToolbar.propTypes = {
+  title: PropTypes.string,
+  numSelected: PropTypes.number,
+  deleteSelected: PropTypes.func,
+  clearSelection: PropTypes.func
+};
+
 export default TableToolbar;

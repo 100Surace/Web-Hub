@@ -1,12 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
+import PropTypes from 'prop-types';
 import { Box, Container, makeStyles } from '@material-ui/core';
 import Page from 'src/components/Page';
-import Results from './Results';
-import Toolbar from './Toolbar';
 import { connect } from 'react-redux';
 import * as actions from 'src/redux/actions/organization/moduleCategory';
 import { fetchAll } from 'src/redux/actions/organization/module';
 import { resetState } from 'src/redux/actions/dataTable';
+import Results from './Results';
+import Toolbar from './Toolbar';
 import './styles.css';
 
 const useStyles = makeStyles((theme) => ({
@@ -23,7 +24,7 @@ const ModuleCategoryListView = ({
   fetchModules,
   modulesList,
   moduleCategoryList,
-  resetState
+  resetDataTableState
 }) => {
   const classes = useStyles();
   const [confirmDeleteModal, setConfirmDeleteModal] = useState(false);
@@ -31,7 +32,7 @@ const ModuleCategoryListView = ({
   useEffect(() => {
     fetchModuleCategory();
     fetchModules();
-    resetState();
+    resetDataTableState();
   }, []);
 
   return (
@@ -51,6 +52,14 @@ const ModuleCategoryListView = ({
   );
 };
 
+ModuleCategoryListView.propTypes = {
+  fetchModuleCategory: PropTypes.func,
+  fetchModules: PropTypes.func,
+  modulesList: PropTypes.object,
+  moduleCategoryList: PropTypes.object,
+  resetDataTableState: PropTypes.func
+};
+
 // mapping redux states to component props
 const mapStateToProps = (state) => ({
   moduleCategoryList: state.moduleCategory.moduleCategoryList,
@@ -61,7 +70,7 @@ const mapStateToProps = (state) => ({
 const mapActionToProps = {
   fetchModuleCategory: actions.FetchAll,
   fetchModules: fetchAll,
-  resetState: resetState
+  resetDataTableState: resetState
 };
 
 export default connect(

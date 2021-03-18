@@ -23,7 +23,6 @@ import {
   TableSortLabel
 } from '@material-ui/core';
 import DeleteIcon from '@material-ui/icons/Delete';
-import TableToolbar from '../TableToolbar';
 import { Search as SearchIcon } from 'react-feather';
 import EditIcon from '@material-ui/icons/Edit';
 import SaveIcon from '@material-ui/icons/Save';
@@ -33,6 +32,8 @@ import { connect } from 'react-redux';
 import * as actions from 'src/redux/actions/organization/module';
 import * as dataTable from 'src/redux/actions/dataTable';
 import ConfirmDelete from 'src/views/modals/ConfirmDelete/index';
+import { sortDesc, sortAsc } from 'src/utils/dataTableHelper';
+import TableToolbar from '../TableToolbar';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -91,6 +92,16 @@ const Results = ({
   const [oldList, setOldList] = useState([]);
   const [searchList, setSearchList] = useState([...modulesList]);
 
+  let currentList = [];
+  const checkAll = (selected) => {
+    currentList = searchList
+      .slice(page * limit, page * limit + limit)
+      .map((module) => module.ids);
+    for (let i = 0; i < currentList.length; i++) {
+      if (selected.includes(currentList[i])) setIsCheckAll(true);
+    }
+  };
+
   const handleSelectAll = (event) => {
     let newSelectedModuleIds;
     if (event.target.checked) {
@@ -111,16 +122,6 @@ const Results = ({
       setSelectedItems(newItems);
       setSelectedPerPage([]);
       setIsCheckAll(false);
-    }
-  };
-
-  let currentList = [];
-  const checkAll = (selected) => {
-    currentList = searchList
-      .slice(page * limit, page * limit + limit)
-      .map((module) => module.ids);
-    for (let i = 0; i < currentList.length; i++) {
-      if (selected.includes(currentList[i])) setIsCheckAll(true);
     }
   };
 
@@ -160,8 +161,7 @@ const Results = ({
     }
   ];
 
-  const onSearching = (e) => {
-    const value = e.target.value;
+  const onSearching = ({ target: { value } }) => {
     setSearchInput(value);
     const result = modulesList.filter((module) =>
       module.moduleName.toLowerCase().includes(value.toLowerCase())
@@ -173,21 +173,9 @@ const Results = ({
     let result = [];
     setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
     if (sortOrder === 'desc') {
-      result = searchList.sort((a, b) =>
-        a.moduleName.toLowerCase() > b.moduleName.toLowerCase()
-          ? 1
-          : b.moduleName.toLowerCase() > a.moduleName.toLowerCase()
-          ? -1
-          : 0
-      );
+      result = searchList.sort((a, b) => sortDesc('Module', a, b));
     } else {
-      result = searchList.sort((a, b) =>
-        a.moduleName.toLowerCase() < b.moduleName.toLowerCase()
-          ? 1
-          : b.moduleName.toLowerCase() < a.moduleName.toLowerCase()
-          ? -1
-          : 0
-      );
+      result = searchList.sort((a, b) => sortAsc('Module', a, b));
     }
     setSearchList(result);
     setIsSorting(true);
@@ -215,6 +203,7 @@ const Results = ({
 
   const clearSelection = () => {
     setSelectedItems([]);
+    setIsCheckAll(false);
   };
 
   currentList = searchList
@@ -227,7 +216,7 @@ const Results = ({
       else setIsCheckAll(false);
     }
 
-    if (!isSorting && searchInput == '') setSearchList(modulesList);
+    if (!isSorting && searchInput === '') setSearchList(modulesList);
     // set page to 0 and set new limit when row per page is all
     if (limit === searchList.length) {
       setLimit(modulesList.length);
@@ -359,6 +348,35 @@ const Results = ({
   );
 };
 
+Results.propTypes = {
+  className: PropTypes.string,
+  modulesList: PropTypes.object,
+  deleteModule: PropTypes.func,
+  updateModule: PropTypes.func,
+  setConfirmDeleteModal: PropTypes.func,
+  confirmDeleteModal: PropTypes.func,
+  limit: PropTypes.number,
+  setLimit: PropTypes.func,
+  page: PropTypes.number,
+  setPage: PropTypes.func,
+  isSorting: PropTypes.bool,
+  setIsSorting: PropTypes.func,
+  sortOrder: PropTypes.string,
+  setSortOrder: PropTypes.func,
+  searchInput: PropTypes.string,
+  setSearchInput: PropTypes.func,
+  isCheckAll: PropTypes.bool,
+  setIsCheckAll: PropTypes.func,
+  selectedPerPage: PropTypes.array,
+  setSelectedPerPage: PropTypes.func,
+  deleteId: PropTypes.number,
+  setDeleteId: PropTypes.func,
+  selectedItems: PropTypes.array,
+  setSelectedItems: PropTypes.func,
+  disableHover: PropTypes.bool,
+  setDisableHover: PropTypes.func
+};
+
 const mapStateToProps = (state) => ({
   limit: state.dataTable.limit,
   page: state.dataTable.page,
@@ -428,11 +446,11 @@ const DataRow = ({
     setEditId(0);
   };
 
-  const onMouseEnterHandler = (e) => {
+  const onMouseEnterHandler = () => {
     setIsHover(true);
   };
 
-  const onMouseLeaveHandler = (e) => {
+  const onMouseLeaveHandler = () => {
     setIsHover(false);
   };
 
@@ -440,6 +458,36 @@ const DataRow = ({
     setDeleteId(id);
     setConfirmDeleteModal(true);
   };
+
+  const renderActionButtons = (data) => {
+    let actionBtns;
+    if (disableHover && editId === data.ids) {
+      actionBtns = (
+        <ButtonGroup>
+          <CloseIcon
+            className="btn-icon"
+            onClick={() => onEditCancel(data.ids)}
+          />
+          <SaveIcon
+            className="btn-icon"
+            onClick={() => saveEditing(data.ids)}
+          />
+        </ButtonGroup>
+      );
+    } else if (isHover && selectedItems.indexOf(data.ids) === -1) {
+      actionBtns = (
+        <ButtonGroup>
+          <EditIcon className="btn-icon" onClick={() => onEdit(module.ids)} />
+          <DeleteIcon
+            className="btn-icon"
+            onClick={() => deleteThis(module.ids)}
+          />
+        </ButtonGroup>
+      );
+    }
+    return actionBtns;
+  };
+
   return (
     <TableRow
       onMouseEnter={onMouseEnterHandler}
@@ -447,13 +495,10 @@ const DataRow = ({
       hover
       key={module.ids}
       selected={selectedItems.indexOf(module.ids) !== -1}
-      className={
-        'data-row ' + selectedItems.indexOf(module.ids) !== -1 ? 'selected' : ''
-      }
     >
       <TableCell padding="checkbox">
         <Checkbox
-          checked={selectedItems.indexOf(module.ids) !== -1 ? true : false}
+          checked={selectedItems.indexOf(module.ids) !== -1}
           onChange={() => handleSelectOne(module.ids)}
           value="true"
         />
@@ -465,58 +510,20 @@ const DataRow = ({
           onInputChange={onInputChange}
         />
       </TableCell>
-      <TableCell align="right">
-        {disableHover ? (
-          editId === module.ids ? (
-            <ButtonGroup>
-              <CloseIcon
-                className="btn-icon"
-                onClick={() => onEditCancel(module.ids)}
-              />
-              <SaveIcon
-                className="btn-icon"
-                onClick={() => saveEditing(module.ids)}
-              />
-            </ButtonGroup>
-          ) : (
-            ''
-          )
-        ) : isHover ? (
-          selectedItems.indexOf(module.ids) === -1 ? (
-            <ButtonGroup>
-              <EditIcon
-                className="btn-icon"
-                onClick={() => onEdit(module.ids)}
-              />
-              <DeleteIcon
-                className="btn-icon"
-                onClick={() => deleteThis(module.ids)}
-              />
-            </ButtonGroup>
-          ) : (
-            ''
-          )
-        ) : (
-          ''
-        )}
-      </TableCell>
+      <TableCell align="right">{renderActionButtons(module)}</TableCell>
     </TableRow>
   );
 };
-const mapStateToProps_datarow = (state) => ({
-  editing: state.dataTable.editing,
-  isHover: state.dataTable.isHover,
-  editId: state.dataTable.editId
-});
-const mapActionsToProps_datarow = {
-  setEditing: dataTable.setEditing,
-  setIsHover: dataTable.setIsHover,
-  setEditId: dataTable.setEditId
-};
-connect(mapStateToProps_datarow, mapActionsToProps_datarow)(DataRow);
 
 DataRow.propTypes = {
-  module: PropTypes.object
+  updateModule: PropTypes.func,
+  module: PropTypes.object,
+  selectedItems: PropTypes.array,
+  handleSelectOne: PropTypes.func,
+  disableHover: PropTypes.bool,
+  setDisableHover: PropTypes.func,
+  setConfirmDeleteModal: PropTypes.func,
+  setDeleteId: PropTypes.func
 };
 
 const CustomTableCell = ({ isEditMode, inputValue, onInputChange }) => {
@@ -537,4 +544,10 @@ const CustomTableCell = ({ isEditMode, inputValue, onInputChange }) => {
       )}
     </>
   );
+};
+
+CustomTableCell.propTypes = {
+  isEditMode: PropTypes.bool,
+  inputValue: PropTypes.string,
+  onInputChange: PropTypes.func
 };

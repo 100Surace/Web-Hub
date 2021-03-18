@@ -1,5 +1,4 @@
 import { ACTION } from '../actions/dataTable';
-import { LOCATION_CHANGE } from 'react-router-redux';
 
 const initialState = {
   limit: 10,
